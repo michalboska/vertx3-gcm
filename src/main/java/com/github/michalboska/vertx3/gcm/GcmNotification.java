@@ -68,6 +68,17 @@ public class GcmNotification {
         this.dryRun = dryRun;
     }
 
+    public JsonObject toJson() {
+        return new JsonObject()
+                .put(JSON_REG_IDS, registrationIds)
+                .put(JSON_COLLAPSE_KEY, collapseKey)
+                .put(JSON_DATA, data)
+                .put(JSON_DELAY_WHILE_IDLE, delayWhileIdle)
+                .put(JSON_TTL_SECONDS, ttlSeconds)
+                .put(JSON_RESTRICT_PACKAGE_NAME, restrictPackageName)
+                .put(JSON_DRY_RUN, dryRun);
+    }
+
     public GcmNotification checkState() throws IllegalStateException {
         if (registrationIds == null || registrationIds.isEmpty()) {
             throw new IllegalStateException("No registration IDs supplied. At least one registration ID required");
