@@ -20,7 +20,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <service.MainClass>com.github.michalboska.vertx3.gcm.Main</service.MainClass>
+        <service.MainClass>com.github.michalboska.vertx3.gcm.GcmService</service.MainClass>
     </properties>
 
     <dependencyManagement>
@@ -82,6 +82,11 @@
 
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/generated</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
