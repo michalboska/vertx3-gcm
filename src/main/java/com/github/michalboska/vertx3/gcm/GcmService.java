@@ -1,6 +1,7 @@
 package com.github.michalboska.vertx3.gcm;
 
 import com.github.michalboska.vertx3.gcm.internal.GcmServiceImpl;
+
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Vertx;
@@ -9,16 +10,12 @@ import io.vertx.core.Vertx;
 @VertxGen
 public interface GcmService {
 
-    static GcmService create(Vertx vertx) {
-        return new GcmServiceImpl(vertx);
+    static GcmService create(Vertx vertx, GcmServiceConfig config) {
+        return new GcmServiceImpl(config);
     }
 
     static GcmService createProxy(Vertx vertx, String address) {
-//        return new GcmSerVer
-        return null;
+        return new GcmServiceVertxEBProxy(vertx, address);
     }
 
-
-    void doSomething(SomeDto someDto);
-    void save(String str1, Long lng2);
 }
