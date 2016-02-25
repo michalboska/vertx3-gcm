@@ -7,7 +7,10 @@ import io.vertx.core.json.JsonObject;
 @DataObject
 public class DeviceIdResult {
 
-    private Boolean success;
+    private static String JSON_MESSAGE_ID = "message_id";
+    private static String JSON_REGISTRATION_ID = "registration_id";
+    private static String JSON_ERROR = "error";
+
     private String messageId;
     private String registrationId;
     private GcmMessageError error;
@@ -17,31 +20,30 @@ public class DeviceIdResult {
     }
 
     public DeviceIdResult(DeviceIdResult copyResult) {
-
+        this(copyResult.getMessageId(), copyResult.getRegistrationId(), copyResult.getError());
     }
 
     public DeviceIdResult(JsonObject jsonObject) {
-
+        this(jsonObject.getString(JSON_MESSAGE_ID),
+                jsonObject.getString(JSON_REGISTRATION_ID),
+                toError(jsonObject.getString(JSON_ERROR)));
     }
 
-    public DeviceIdResult(Boolean success, String messageId, String registrationId, GcmMessageError error) {
-        this.success = success;
+    public DeviceIdResult(String messageId, String registrationId, GcmMessageError error) {
         this.messageId = messageId;
         this.registrationId = registrationId;
         this.error = error;
     }
 
     public JsonObject toJson() {
-        return null;
+        return new JsonObject()
+                .put(JSON_MESSAGE_ID, messageId)
+                .put(JSON_REGISTRATION_ID, registrationId)
+                .put(JSON_ERROR, error.name());
     }
 
     public Boolean getSuccess() {
-        return success;
-    }
-
-    public DeviceIdResult setSuccess(Boolean success) {
-        this.success = success;
-        return this;
+        return this.error == null;
     }
 
     public String getMessageId() {
@@ -69,5 +71,12 @@ public class DeviceIdResult {
     public DeviceIdResult setError(GcmMessageError error) {
         this.error = error;
         return this;
+    }
+
+    private static GcmMessageError toError(String error) {
+        if (error == null) {
+            return null;
+        }
+        return GcmMessageError.valueOf(error);
     }
 }
