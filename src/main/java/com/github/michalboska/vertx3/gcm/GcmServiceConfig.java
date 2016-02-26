@@ -2,6 +2,7 @@ package com.github.michalboska.vertx3.gcm;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.Validate;
 
 /**
  * @author Michal Boska
@@ -76,9 +77,8 @@ public class GcmServiceConfig {
     }
 
     public GcmServiceConfig checkState() throws IllegalStateException {
-        if (apiKey == null) {
-            throw new IllegalStateException("Api key must be set");
-        }
+        Validate.validState(apiKey != null, "Api key must be set");
+        Validate.validState(address != null, "Eventbus address to listen on must be set");
         return this;
     }
 
