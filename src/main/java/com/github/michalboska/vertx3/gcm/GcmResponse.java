@@ -1,10 +1,11 @@
 package com.github.michalboska.vertx3.gcm;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Michal Boska
@@ -23,6 +24,7 @@ public class GcmResponse {
     private Map<String, DeviceIdResult> deviceResults;
 
     public GcmResponse() {
+        deviceResults = Collections.emptyMap();
     }
 
     public GcmResponse(GcmResponse copyResponse) {

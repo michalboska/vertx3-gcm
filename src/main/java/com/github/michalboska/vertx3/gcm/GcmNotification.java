@@ -1,10 +1,11 @@
 package com.github.michalboska.vertx3.gcm;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Michal Boska
@@ -32,6 +33,7 @@ public class GcmNotification {
     private Boolean dryRun = false;
 
     public GcmNotification() {
+        this.registrationIds = Collections.emptySet();
     }
 
     public GcmNotification(Set<String> registrationIds) {

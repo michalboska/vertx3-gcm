@@ -32,7 +32,7 @@ public class GcmServiceImplTest {
         Vertx vertx = rule.vertx();
         gcmService = (GcmServiceImpl) GcmService.create(vertx, new GcmServiceConfig(""));
         assertNotNull(gcmService);
-//        vertx.deployVerticle(gcmService, context.asyncAssertSuccess());
+        vertx.deployVerticle(gcmService, context.asyncAssertSuccess());
     }
 
     @Test(timeout = 5000)
