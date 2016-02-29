@@ -1,11 +1,11 @@
 package com.github.michalboska.vertx3.gcm;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Michal Boska
@@ -13,16 +13,18 @@ import java.util.Set;
 @DataObject
 public class GcmNotification {
 
-    private static String JSON_REG_IDS = "registrationIds";
-    private static String JSON_COLLAPSE_KEY = "collapseKey";
+    private static String JSON_REG_IDS = "registration_ids";
+    private static String JSON_COLLAPSE_KEY = "collapse_key";
     private static String JSON_DATA = "data";
-    private static String JSON_DELAY_WHILE_IDLE = "delayWhileIdle";
-    private static String JSON_TTL_SECONDS = "ttlSeconds";
-    private static String JSON_RESTRICT_PACKAGE_NAME = "restrictPackageName";
-    private static String JSON_DRY_RUN = "dryRun";
+    private static String JSON_DELAY_WHILE_IDLE = "delay_while_idle";
+    private static String JSON_TTL_SECONDS = "ttl_seconds";
+    private static String JSON_RESTRICT_PACKAGE_NAME = "restrict_package_name";
+    private static String JSON_DRY_RUN = "dry_run";
 
     ///MANDATORY FIELDS
-    private Set<String> registrationIds;
+    //Set would be more appropriate, but Vert.x Json can't de/serialize Sets and we don't want to always convert
+    //to/from Lists
+    private List<String> registrationIds;
 
     ///OPTIONAL FIELDS
     private String collapseKey;
@@ -33,10 +35,10 @@ public class GcmNotification {
     private Boolean dryRun = false;
 
     public GcmNotification() {
-        this.registrationIds = Collections.emptySet();
+        this.registrationIds = Collections.emptyList();
     }
 
-    public GcmNotification(Set<String> registrationIds) {
+    public GcmNotification(List<String> registrationIds) {
         this.registrationIds = registrationIds;
     }
 
@@ -51,7 +53,7 @@ public class GcmNotification {
     }
 
     public GcmNotification(JsonObject jsonObject) {
-        this(new HashSet<>(jsonObject.getJsonArray(JSON_REG_IDS).getList()),
+        this(jsonObject.getJsonArray(JSON_REG_IDS).getList(),
                 jsonObject.getString(JSON_COLLAPSE_KEY),
                 jsonObject.getJsonObject(JSON_DATA),
                 jsonObject.getBoolean(JSON_DELAY_WHILE_IDLE),
@@ -60,7 +62,7 @@ public class GcmNotification {
                 jsonObject.getBoolean(JSON_DRY_RUN));
     }
 
-    public GcmNotification(Set<String> registrationIds, String collapseKey, JsonObject data, Boolean delayWhileIdle, Long ttlSeconds, String restrictPackageName, Boolean dryRun) {
+    public GcmNotification(List<String> registrationIds, String collapseKey, JsonObject data, Boolean delayWhileIdle, Long ttlSeconds, String restrictPackageName, Boolean dryRun) {
         this.registrationIds = registrationIds;
         this.collapseKey = collapseKey;
         this.data = data;
@@ -71,14 +73,27 @@ public class GcmNotification {
     }
 
     public JsonObject toJson() {
-        return new JsonObject()
-                .put(JSON_REG_IDS, registrationIds)
-                .put(JSON_COLLAPSE_KEY, collapseKey)
-                .put(JSON_DATA, data)
-                .put(JSON_DELAY_WHILE_IDLE, delayWhileIdle)
-                .put(JSON_TTL_SECONDS, ttlSeconds)
-                .put(JSON_RESTRICT_PACKAGE_NAME, restrictPackageName)
-                .put(JSON_DRY_RUN, dryRun);
+        JsonObject result = new JsonObject()
+                .put(JSON_REG_IDS, new JsonArray(registrationIds));
+        if (collapseKey != null) {
+            result.put(JSON_COLLAPSE_KEY, collapseKey);
+        }
+        if (data != null) {
+            result.put(JSON_DATA, data);
+        }
+        if (delayWhileIdle != null) {
+            result.put(JSON_DELAY_WHILE_IDLE, delayWhileIdle);
+        }
+        if (ttlSeconds != null) {
+            result.put(JSON_TTL_SECONDS, ttlSeconds);
+        }
+        if (restrictPackageName != null) {
+            result.put(JSON_RESTRICT_PACKAGE_NAME, restrictPackageName);
+        }
+        if (dryRun != null) {
+            result.put(JSON_DRY_RUN, dryRun);
+        }
+        return result;
     }
 
     public GcmNotification checkState() throws IllegalStateException {
@@ -88,11 +103,11 @@ public class GcmNotification {
         return this;
     }
 
-    public Set<String> getRegistrationIds() {
+    public List<String> getRegistrationIds() {
         return registrationIds;
     }
 
-    public GcmNotification setRegistrationIds(Set<String> registrationIds) {
+    public GcmNotification setRegistrationIds(List<String> registrationIds) {
         this.registrationIds = registrationIds;
         return this;
     }

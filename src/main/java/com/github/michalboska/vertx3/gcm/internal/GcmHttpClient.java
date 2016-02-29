@@ -12,12 +12,17 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rx.java.ObservableHandler;
 import io.vertx.rx.java.RxHelper;
 
 public class GcmHttpClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcmHttpClient.class);
 
     public static final String GCM_SERVER_HOSTNAME = "gcm-http.googleapis.com";
     public static final Integer GCM_SERVER_PORT = 443;
@@ -46,7 +51,7 @@ public class GcmHttpClient {
         HttpClientRequest request = httpClient.post(GCM_SERVER_URI_PATH, httpResponseObservable.toHandler());
         request.putHeader("Content-Type", "application/json");
         request.putHeader("Authorization", String.format("key=%s", config.getApiKey()));
-        request.end(notification.toJson().encode());
+        request.end(notificationToJson(notification).encode());
 
         httpResponseObservable.subscribe((httpClientResponse) -> {
             httpClientResponse.bodyHandler((bodyBuffer -> {
@@ -60,6 +65,12 @@ public class GcmHttpClient {
             resultHandler.handle(Future.failedFuture(new GcmException("Could not send GCM request", throwable)));
         });
         return resultFuture;
+    }
+
+    private JsonObject notificationToJson(GcmNotification notification) {
+        JsonObject jsonObject = notification.toJson();
+        LOGGER.info(jsonObject);
+        return jsonObject;
     }
 
 }

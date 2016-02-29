@@ -6,6 +6,7 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.rx.java.ObservableFuture;
 import org.apache.commons.lang3.Validate;
 
 
@@ -64,32 +65,18 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
     public GcmService sendNotification(GcmNotification notification, Handler<AsyncResult<GcmResponse>> handler) {
         Validate.validState(started, "Service instance has not been started. " +
                 "When running this service locally (not as a separately deployed Verticle), use the startLocally method first");
-        vertx.setTimer(500, (id) -> handler.handle(new AsyncResult<GcmResponse>() {
-            @Override
-            public GcmResponse result() {
-                return new GcmResponse();
-            }
-
-            @Override
-            public Throwable cause() {
-                return null;
-            }
-
-            @Override
-            public boolean succeeded() {
-                return true;
-            }
-
-            @Override
-            public boolean failed() {
-                return false;
-            }
-        }));
+        ObservableFuture<JsonObject> future = httpClient.doRequest(notification);
+        future.subscribe(jsonObject -> {
+            handler.handle(Future.succeededFuture(toGcmResponse(jsonObject)));
+        }, throwable -> {
+            handler.handle(Future.failedFuture(throwable));
+        });
         return this;
     }
 
-
-
+    private GcmResponse toGcmResponse(JsonObject jsonObject) {
+        return new GcmResponse(jsonObject);
+    }
 
 
 }
