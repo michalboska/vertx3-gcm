@@ -21,7 +21,7 @@ public class GcmResponse {
 
     private Long multicastId;
     private Integer successCount, failureCount, canonicalIdCount;
-    private Map<String, DeviceIdResult> deviceResults;
+    private Map<String, SingleMessageResult> deviceResults;
 
     public GcmResponse() {
         deviceResults = Collections.emptyMap();
@@ -44,7 +44,7 @@ public class GcmResponse {
 
     }
 
-    public GcmResponse(Long multicastId, Integer successCount, Integer failureCount, Integer canonicalIdCount, Map<String, DeviceIdResult> deviceResults) {
+    public GcmResponse(Long multicastId, Integer successCount, Integer failureCount, Integer canonicalIdCount, Map<String, SingleMessageResult> deviceResults) {
         this.multicastId = multicastId;
         this.successCount = successCount;
         this.failureCount = failureCount;
@@ -97,29 +97,29 @@ public class GcmResponse {
         return this;
     }
 
-    public Map<String, DeviceIdResult> getDeviceResults() {
+    public Map<String, SingleMessageResult> getDeviceResults() {
         return deviceResults;
     }
 
-    public GcmResponse setDeviceResults(Map<String, DeviceIdResult> deviceResults) {
+    public GcmResponse setDeviceResults(Map<String, SingleMessageResult> deviceResults) {
         this.deviceResults = deviceResults;
         return this;
     }
 
-    private static Map<String, DeviceIdResult> toDeviceIdResultMap(JsonObject jsonObject) {
-        HashMap<String, DeviceIdResult> destMap = new HashMap<>(jsonObject.size());
+    private static Map<String, SingleMessageResult> toDeviceIdResultMap(JsonObject jsonObject) {
+        HashMap<String, SingleMessageResult> destMap = new HashMap<>(jsonObject.size());
         jsonObject
                 .getMap()
                 .forEach((String key, Object value) -> {
                     if (!(value instanceof JsonObject)) {
                         throw new IllegalArgumentException("Results field must be a JSON object");
                     }
-                    destMap.put(key, new DeviceIdResult((JsonObject) value));
+                    destMap.put(key, new SingleMessageResult((JsonObject) value));
                 });
         return destMap;
     }
 
-    private static JsonObject fromDeviceIdResultMap(Map<String, ? super DeviceIdResult> map) {
+    private static JsonObject fromDeviceIdResultMap(Map<String, ? super SingleMessageResult> map) {
         return new JsonObject((Map<String, Object>) map);
     }
 }

@@ -5,7 +5,7 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 @DataObject
-public class DeviceIdResult {
+public class SingleMessageResult {
 
     private static String JSON_MESSAGE_ID = "message_id";
     private static String JSON_REGISTRATION_ID = "registration_id";
@@ -13,23 +13,23 @@ public class DeviceIdResult {
 
     private String messageId;
     private String registrationId;
-    private GcmMessageError error;
+    private SingleMessageErrorType error;
 
 
-    public DeviceIdResult() {
+    public SingleMessageResult() {
     }
 
-    public DeviceIdResult(DeviceIdResult copyResult) {
+    public SingleMessageResult(SingleMessageResult copyResult) {
         this(copyResult.getMessageId(), copyResult.getRegistrationId(), copyResult.getError());
     }
 
-    public DeviceIdResult(JsonObject jsonObject) {
+    public SingleMessageResult(JsonObject jsonObject) {
         this(jsonObject.getString(JSON_MESSAGE_ID),
                 jsonObject.getString(JSON_REGISTRATION_ID),
                 toError(jsonObject.getString(JSON_ERROR)));
     }
 
-    public DeviceIdResult(String messageId, String registrationId, GcmMessageError error) {
+    public SingleMessageResult(String messageId, String registrationId, SingleMessageErrorType error) {
         this.messageId = messageId;
         this.registrationId = registrationId;
         this.error = error;
@@ -50,7 +50,7 @@ public class DeviceIdResult {
         return messageId;
     }
 
-    public DeviceIdResult setMessageId(String messageId) {
+    public SingleMessageResult setMessageId(String messageId) {
         this.messageId = messageId;
         return this;
     }
@@ -59,24 +59,24 @@ public class DeviceIdResult {
         return registrationId;
     }
 
-    public DeviceIdResult setRegistrationId(String registrationId) {
+    public SingleMessageResult setRegistrationId(String registrationId) {
         this.registrationId = registrationId;
         return this;
     }
 
-    public GcmMessageError getError() {
+    public SingleMessageErrorType getError() {
         return error;
     }
 
-    public DeviceIdResult setError(GcmMessageError error) {
+    public SingleMessageResult setError(SingleMessageErrorType error) {
         this.error = error;
         return this;
     }
 
-    private static GcmMessageError toError(String error) {
+    private static SingleMessageErrorType toError(String error) {
         if (error == null) {
             return null;
         }
-        return GcmMessageError.valueOf(error);
+        return SingleMessageErrorType.valueOf(error);
     }
 }
