@@ -1,12 +1,10 @@
 package com.github.michalboska.vertx3.gcm;
 
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Michal Boska
@@ -60,6 +58,46 @@ public class GcmResponse {
                 .put(JSON_FAILURE_COUNT, failureCount)
                 .put(JSON_CANONICAL_IDS, canonicalIdCount)
                 .put(JSON_RESULTS, fromDeviceIdResultMap(deviceResults));
+    }
+
+    /**
+     * A convenience method to collect all registration IDs, that were rejected by GCM, because they are invalid.
+     * This list does not contain registration IDs that failed due to other reasons than being invalid (for example due to technical difficulties at GCM).
+     *
+     * IDs returned by this method should presumably be removed from the sender's database.
+     *
+     * @return A set of registration IDs
+     */
+    public Set<String> getInvalidRegistrationIds() {
+        if (this.failureCount == 0) {
+            return Collections.emptySet();
+        }
+        return this.deviceResults
+                .entrySet()
+                .stream()
+                .filter(entry -> !entry.getValue().getSuccess() && entry.getValue().getError().isErrorDueToWrongRegistrationId())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * A convenience method to collect all registration IDs, that have their newer versions available (for the same device) along with those newer IDs.
+     * The sender should update its database to use the newer registration ID for the same device in the future.
+     *
+     * @return A map of (old registration id -> new registration id) entries
+     * @see <a href="https://developers.google.com/cloud-messaging/registration#canonical-ids">GCM documentation - Canonical IDs</a>
+     */
+    public Map<String, String> getRegistrationIdReplacements() {
+        if (this.canonicalIdCount == 0) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> result = new HashMap<>(this.canonicalIdCount);
+        this.deviceResults
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().getRegistrationId() != null)
+                .forEach(entry -> result.put(entry.getKey(), entry.getValue().getRegistrationId()));
+        return result;
     }
 
     public Long getMulticastId() {

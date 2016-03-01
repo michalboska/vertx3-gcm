@@ -30,7 +30,7 @@ public class GcmServiceImplTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcmServiceImplTest.class);
 
-    private static final String API_KEY = "";
+    private static final String API_KEY = "AIzaSyDj7HE9NHxjjDXXroNF2UMz3CcD2_4QX5o";
 
     private GcmServiceImpl gcmService;
 
