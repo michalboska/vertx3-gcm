@@ -65,18 +65,13 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
     public GcmService sendNotification(GcmNotification notification, Handler<AsyncResult<GcmResponse>> handler) {
         Validate.validState(started, "Service instance has not been started. " +
                 "When running this service locally (not as a separately deployed Verticle), use the startLocally method first");
-        ObservableFuture<JsonObject> future = httpClient.doRequest(notification);
-        future.subscribe(jsonObject -> {
-            handler.handle(Future.succeededFuture(toGcmResponse(jsonObject)));
+        ObservableFuture<GcmResponse> future = httpClient.doRequest(notification);
+        future.subscribe(response -> {
+            handler.handle(Future.succeededFuture(response));
         }, throwable -> {
             handler.handle(Future.failedFuture(throwable));
         });
         return this;
     }
-
-    private GcmResponse toGcmResponse(JsonObject jsonObject) {
-        return new GcmResponse(jsonObject);
-    }
-
 
 }

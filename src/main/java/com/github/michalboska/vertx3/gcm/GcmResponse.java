@@ -1,6 +1,7 @@
 package com.github.michalboska.vertx3.gcm;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Collections;
@@ -13,11 +14,11 @@ import java.util.Map;
 @DataObject
 public class GcmResponse {
 
-    private static String JSON_MULTICASTID = "multicast_id";
-    private static String JSON_SUCCESS_COUNT = "success";
-    private static String JSON_FAILURE_COUNT = "failure";
-    private static String JSON_CANONICAL_IDS = "canonical_ids";
-    private static String JSON_RESULTS = "results";
+    public static final String JSON_MULTICASTID = "multicast_id";
+    public static final String JSON_SUCCESS_COUNT = "success";
+    public static final String JSON_FAILURE_COUNT = "failure";
+    public static final String JSON_CANONICAL_IDS = "canonical_ids";
+    public static final String JSON_RESULTS = "results";
 
     private Long multicastId;
     private Integer successCount, failureCount, canonicalIdCount;
@@ -120,7 +121,12 @@ public class GcmResponse {
     }
 
     private static JsonObject fromDeviceIdResultMap(Map<String, ? super SingleMessageResult> map) {
-        return new JsonObject((Map<String, Object>) map);
+        JsonObject result = new JsonObject();
+        map.entrySet().forEach(entry -> {
+            SingleMessageResult value = (SingleMessageResult) entry.getValue();
+            result.put(entry.getKey(), value.toJson());
+        });
+        return result;
     }
 }
 

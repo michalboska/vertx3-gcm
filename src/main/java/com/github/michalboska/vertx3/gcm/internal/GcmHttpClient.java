@@ -1,7 +1,9 @@
 package com.github.michalboska.vertx3.gcm.internal;
 
 import com.github.michalboska.vertx3.gcm.GcmNotification;
+import com.github.michalboska.vertx3.gcm.GcmResponse;
 import com.github.michalboska.vertx3.gcm.GcmServiceConfig;
+import com.github.michalboska.vertx3.gcm.SingleMessageResult;
 import com.github.michalboska.vertx3.gcm.exceptions.GcmException;
 import com.github.michalboska.vertx3.gcm.exceptions.GcmHttpException;
 import io.vertx.core.AsyncResult;
@@ -19,6 +21,12 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rx.java.ObservableHandler;
 import io.vertx.rx.java.RxHelper;
+import org.apache.commons.lang3.Validate;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GcmHttpClient {
 
@@ -43,20 +51,21 @@ public class GcmHttpClient {
         );
     }
 
-    public ObservableFuture<JsonObject> doRequest(GcmNotification notification) {
-        ObservableFuture<JsonObject> resultFuture = RxHelper.<JsonObject>observableFuture();
-        Handler<AsyncResult<JsonObject>> resultHandler = resultFuture.toHandler();
+    public ObservableFuture<GcmResponse> doRequest(GcmNotification notification) {
+        ObservableFuture<GcmResponse> resultFuture = RxHelper.observableFuture();
+        Handler<AsyncResult<GcmResponse>> resultHandler = resultFuture.toHandler();
 
         ObservableHandler<HttpClientResponse> httpResponseObservable = RxHelper.observableHandler(false);
         HttpClientRequest request = httpClient.post(GCM_SERVER_URI_PATH, httpResponseObservable.toHandler());
         request.putHeader("Content-Type", "application/json");
         request.putHeader("Authorization", String.format("key=%s", config.getApiKey()));
-        request.end(notificationToJson(notification).encode());
+        request.end(notification.toJson().encode());
 
+        List<String> registrationIds = notification.getRegistrationIds();
         httpResponseObservable.subscribe((httpClientResponse) -> {
             httpClientResponse.bodyHandler((bodyBuffer -> {
                 if (httpClientResponse.statusCode() == 200) {
-                    resultHandler.handle(Future.succeededFuture(bodyBuffer.toJsonObject()));
+                    resultHandler.handle(Future.succeededFuture(responseJsonToDto(bodyBuffer.toJsonObject(), registrationIds)));
                 } else {
                     resultHandler.handle(Future.failedFuture(new GcmHttpException(httpClientResponse.statusCode(), httpClientResponse.statusMessage(), bodyBuffer.toString())));
                 }
@@ -67,10 +76,25 @@ public class GcmHttpClient {
         return resultFuture;
     }
 
-    private JsonObject notificationToJson(GcmNotification notification) {
-        JsonObject jsonObject = notification.toJson();
-        LOGGER.info(jsonObject);
-        return jsonObject;
+    private GcmResponse responseJsonToDto(JsonObject jsonObject, List<String> requestRegistrationIds) {
+        JsonArray results = jsonObject.getJsonArray("results");
+        Map<String, SingleMessageResult> singleMessageResultMap;
+        if (results.size() == 0) {
+            singleMessageResultMap = Collections.emptyMap();
+        } else {
+            Validate.validState(requestRegistrationIds.size() == results.size());
+            singleMessageResultMap = new HashMap<>(results.size());
+            for (int i = 0; i < results.size(); i++) {
+                JsonObject singleResult = results.getJsonObject(i);
+                String registrationId = requestRegistrationIds.get(i);
+                singleMessageResultMap.put(registrationId, new SingleMessageResult(singleResult));
+            }
+        }
+        return new GcmResponse(jsonObject.getLong(GcmResponse.JSON_MULTICASTID),
+                jsonObject.getInteger(GcmResponse.JSON_SUCCESS_COUNT),
+                jsonObject.getInteger(GcmResponse.JSON_FAILURE_COUNT),
+                jsonObject.getInteger(GcmResponse.JSON_CANONICAL_IDS),
+                singleMessageResultMap);
     }
 
 }

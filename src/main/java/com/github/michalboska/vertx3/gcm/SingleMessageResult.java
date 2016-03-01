@@ -39,7 +39,7 @@ public class SingleMessageResult {
         return new JsonObject()
                 .put(JSON_MESSAGE_ID, messageId)
                 .put(JSON_REGISTRATION_ID, registrationId)
-                .put(JSON_ERROR, error.name());
+                .put(JSON_ERROR, error.getErrorCode());
     }
 
     public Boolean getSuccess() {
@@ -77,6 +77,6 @@ public class SingleMessageResult {
         if (error == null) {
             return null;
         }
-        return SingleMessageErrorType.valueOf(error);
+        return SingleMessageErrorType.fromGoogleErrorCode(error);
     }
 }

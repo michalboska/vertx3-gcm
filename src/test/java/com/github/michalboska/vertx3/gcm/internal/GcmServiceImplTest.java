@@ -45,18 +45,19 @@ public class GcmServiceImplTest {
         vertx.deployVerticle(gcmService, context.asyncAssertSuccess());
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void testFoo(TestContext context) {
         Async async = context.async();
         String address = GcmService.class.getCanonicalName();
         MessageConsumer<JsonObject> consumer = ProxyHelper.registerService(GcmService.class, rule.vertx(), gcmService, address);
         GcmService proxy = ProxyHelper.createProxy(GcmService.class, rule.vertx(), address);
 
-        proxy.sendNotification(new GcmNotification(Arrays.asList("adsa", "adsfdsf")), (event -> {
-            if (event.failed()) {
-                context.fail(event.cause());
+        proxy.sendNotification(new GcmNotification(Arrays.asList("adsa", "adsfdsf")), (response -> {
+            if (response.failed()) {
+                context.fail(response.cause());
             } else {
-                LOGGER.info(event.result().toJson());
+                LOGGER.info(response.result().toJson());
+                async.complete();
             }
         }));
     }
