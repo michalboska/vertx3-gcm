@@ -13,13 +13,14 @@ import java.util.stream.Collectors;
 public class GcmResponse {
 
     public static final String JSON_MULTICASTID = "multicast_id";
+    public static final String JSON_RETRY_AFTER = "retry_after";
     public static final String JSON_SUCCESS_COUNT = "success";
     public static final String JSON_FAILURE_COUNT = "failure";
     public static final String JSON_CANONICAL_IDS = "canonical_ids";
     public static final String JSON_RESULTS = "results";
 
     private Long multicastId;
-    private Integer successCount, failureCount, canonicalIdCount;
+    private Integer successCount, failureCount, canonicalIdCount, retryAfterSeconds;
     private Map<String, SingleMessageResult> deviceResults;
 
     public GcmResponse() {
@@ -28,6 +29,7 @@ public class GcmResponse {
 
     public GcmResponse(GcmResponse copyResponse) {
         this(copyResponse.getMulticastId(),
+                copyResponse.getRetryAfterSeconds(),
                 copyResponse.getSuccessCount(),
                 copyResponse.getFailureCount(),
                 copyResponse.getCanonicalIdCount(),
@@ -36,6 +38,7 @@ public class GcmResponse {
 
     public GcmResponse(JsonObject jsonObject) {
         this(jsonObject.getLong(JSON_MULTICASTID),
+                jsonObject.getInteger(JSON_RETRY_AFTER),
                 jsonObject.getInteger(JSON_SUCCESS_COUNT),
                 jsonObject.getInteger(JSON_FAILURE_COUNT),
                 jsonObject.getInteger(JSON_CANONICAL_IDS),
@@ -43,8 +46,14 @@ public class GcmResponse {
 
     }
 
-    public GcmResponse(Long multicastId, Integer successCount, Integer failureCount, Integer canonicalIdCount, Map<String, SingleMessageResult> deviceResults) {
+    public GcmResponse(Long multicastId,
+                       Integer retryAfterSeconds,
+                       Integer successCount,
+                       Integer failureCount,
+                       Integer canonicalIdCount,
+                       Map<String, SingleMessageResult> deviceResults) {
         this.multicastId = multicastId;
+        this.retryAfterSeconds = retryAfterSeconds;
         this.successCount = successCount;
         this.failureCount = failureCount;
         this.canonicalIdCount = canonicalIdCount;
@@ -54,6 +63,7 @@ public class GcmResponse {
     public JsonObject toJson() {
         return new JsonObject()
                 .put(JSON_MULTICASTID, multicastId)
+                .put(JSON_RETRY_AFTER, retryAfterSeconds)
                 .put(JSON_SUCCESS_COUNT, successCount)
                 .put(JSON_FAILURE_COUNT, failureCount)
                 .put(JSON_CANONICAL_IDS, canonicalIdCount)
@@ -165,6 +175,15 @@ public class GcmResponse {
             result.put(entry.getKey(), value.toJson());
         });
         return result;
+    }
+
+    public Integer getRetryAfterSeconds() {
+        return retryAfterSeconds;
+    }
+
+    public GcmResponse setRetryAfterSeconds(Integer retryAfterSeconds) {
+        this.retryAfterSeconds = retryAfterSeconds;
+        return this;
     }
 }
 

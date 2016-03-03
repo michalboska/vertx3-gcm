@@ -23,18 +23,16 @@ import io.vertx.rx.java.ObservableHandler;
 import io.vertx.rx.java.RxHelper;
 import org.apache.commons.lang3.Validate;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GcmHttpClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcmHttpClient.class);
+    public static final String RETRY_AFTER_HEADER = "Retry-After";
 
     public static final String GCM_SERVER_HOSTNAME = "gcm-http.googleapis.com";
     public static final Integer GCM_SERVER_PORT = 443;
-    private static final String GCM_SERVER_URI_PATH = "/gcm/send";
+    public static final String GCM_SERVER_URI_PATH = "/gcm/send";
 
     private Vertx vertx;
     private GcmServiceConfig config;
@@ -65,9 +63,13 @@ public class GcmHttpClient {
         httpResponseObservable.subscribe((httpClientResponse) -> {
             httpClientResponse.bodyHandler((bodyBuffer -> {
                 if (httpClientResponse.statusCode() == 200) {
-                    resultHandler.handle(Future.succeededFuture(responseJsonToDto(bodyBuffer.toJsonObject(), registrationIds)));
+                    resultHandler.handle(Future.succeededFuture(responseJsonToDto(bodyBuffer.toJsonObject(), getRetryAfterSeconds(httpClientResponse), registrationIds)));
                 } else {
-                    resultHandler.handle(Future.failedFuture(new GcmHttpException(httpClientResponse.statusCode(), httpClientResponse.statusMessage(), bodyBuffer.toString())));
+                    resultHandler.handle(Future.failedFuture(new GcmHttpException(httpClientResponse.statusCode(),
+                            getRetryAfterSeconds(httpClientResponse),
+                            httpClientResponse.statusMessage(),
+                            bodyBuffer.toString()))
+                    );
                 }
             }));
         }, (throwable) -> {
@@ -76,7 +78,14 @@ public class GcmHttpClient {
         return resultFuture;
     }
 
-    private GcmResponse responseJsonToDto(JsonObject jsonObject, List<String> requestRegistrationIds) {
+    private Integer getRetryAfterSeconds(HttpClientResponse response) {
+        Optional<String> retryAfter = Optional.ofNullable(response.getHeader(RETRY_AFTER_HEADER));
+        return retryAfter
+                .map((s -> s == null ? null : Integer.valueOf(s)))
+                .orElse(null);
+    }
+
+    private GcmResponse responseJsonToDto(JsonObject jsonObject, Integer retryAfterSeconds, List<String> requestRegistrationIds) {
         JsonArray results = jsonObject.getJsonArray("results");
         Map<String, SingleMessageResult> singleMessageResultMap;
         if (results.size() == 0) {
@@ -91,6 +100,7 @@ public class GcmHttpClient {
             }
         }
         return new GcmResponse(jsonObject.getLong(GcmResponse.JSON_MULTICASTID),
+                retryAfterSeconds,
                 jsonObject.getInteger(GcmResponse.JSON_SUCCESS_COUNT),
                 jsonObject.getInteger(GcmResponse.JSON_FAILURE_COUNT),
                 jsonObject.getInteger(GcmResponse.JSON_CANONICAL_IDS),

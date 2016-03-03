@@ -3,6 +3,8 @@ package com.github.michalboska.vertx3.gcm;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -164,5 +166,37 @@ public class GcmNotification {
     public GcmNotification setDryRun(Boolean dryRun) {
         this.dryRun = dryRun;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GcmNotification that = (GcmNotification) o;
+
+        return new EqualsBuilder()
+                .append(registrationIds, that.registrationIds)
+                .append(collapseKey, that.collapseKey)
+                .append(data, that.data)
+                .append(delayWhileIdle, that.delayWhileIdle)
+                .append(ttlSeconds, that.ttlSeconds)
+                .append(restrictPackageName, that.restrictPackageName)
+                .append(dryRun, that.dryRun)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(registrationIds)
+                .append(collapseKey)
+                .append(data)
+                .append(delayWhileIdle)
+                .append(ttlSeconds)
+                .append(restrictPackageName)
+                .append(dryRun)
+                .toHashCode();
     }
 }
