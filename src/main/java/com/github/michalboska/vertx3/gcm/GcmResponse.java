@@ -3,7 +3,10 @@ package com.github.michalboska.vertx3.gcm;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -73,7 +76,7 @@ public class GcmResponse {
     /**
      * A convenience method to collect all registration IDs, that were rejected by GCM, because they are invalid.
      * This list does not contain registration IDs that failed due to other reasons than being invalid (for example due to technical difficulties at GCM).
-     *
+     * <p>
      * IDs returned by this method should presumably be removed from the sender's database.
      *
      * @return A set of registration IDs
@@ -108,6 +111,24 @@ public class GcmResponse {
                 .filter(entry -> entry.getValue().getRegistrationId() != null)
                 .forEach(entry -> result.put(entry.getKey(), entry.getValue().getRegistrationId()));
         return result;
+    }
+
+    /**
+     * Get a set of device IDs for which a recoverable error has been encountered and it makes sense to retry the operation
+     * after a certain delay
+     *
+     * @return
+     */
+    public Set<String> getDeviceIdsToRetry() {
+        if (this.failureCount == 0) {
+            return Collections.emptySet();
+        }
+        return this.deviceResults
+                .entrySet()
+                .stream()
+                .filter(entry -> !entry.getValue().getSuccess() && entry.getValue().getError().shouldRetry())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
     }
 
     public Long getMulticastId() {

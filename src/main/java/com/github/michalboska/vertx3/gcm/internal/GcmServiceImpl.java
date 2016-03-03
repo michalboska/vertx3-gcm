@@ -1,6 +1,7 @@
 package com.github.michalboska.vertx3.gcm.internal;
 
 import com.github.michalboska.vertx3.gcm.*;
+import com.github.michalboska.vertx3.gcm.exceptions.GcmHttpException;
 import io.vertx.core.*;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
@@ -9,6 +10,11 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
 import org.apache.commons.lang3.Validate;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class GcmServiceImpl extends AbstractVerticle implements GcmService {
 
@@ -16,9 +22,10 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
 
     private GcmServiceConfig config;
     private GcmServiceVertxProxyHandler handler;
+    private GcmHttpClient httpClient;
 
     private boolean started = false;
-    private GcmHttpClient httpClient;
+    private Map<GcmNotification, NotificationState> stateMap = new HashMap<>();
 
     public GcmServiceImpl(GcmServiceConfig config) {
         config.checkState();
@@ -70,13 +77,67 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
     public GcmService sendNotification(GcmNotification notification, Handler<AsyncResult<GcmResponse>> handler) {
         Validate.validState(started, "Service instance has not been started. " +
                 "When running this service locally (not as a separately deployed Verticle), use the startLocally method first");
+        Validate.validState(stateMap.get(notification) == null, "The supplied GCM notification is already being processed");
+        stateMap.put(notification, new NotificationState());
+        doSendNotification(notification, handler);
+        return this;
+    }
+
+    private void doSendNotification(GcmNotification notification, Handler<AsyncResult<GcmResponse>> handler) {
         ObservableFuture<GcmResponse> future = httpClient.doRequest(notification);
         future.subscribe(response -> {
             handler.handle(Future.succeededFuture(response));
         }, throwable -> {
-            handler.handle(Future.failedFuture(throwable));
+            handleError(notification, throwable, handler);
         });
-        return this;
+    }
+
+    private void handleSuccess(GcmNotification notification, GcmResponse response, Handler<AsyncResult<GcmResponse>> handler) {
+        handler.handle(Future.succeededFuture(response));
+        //TODO: Parse the response, if there is any error result and we are configured to retry, then retry only those failed
+    }
+
+    private void handleError(GcmNotification notification, Throwable error, Handler<AsyncResult<GcmResponse>> handler) {
+        if (error instanceof GcmHttpException) {
+            GcmHttpException httpException = (GcmHttpException) error;
+            NotificationState state = stateMap.get(notification);
+            if (httpException.shouldRetry() && !state.hasExpired()) {
+                retryNotification(notification, handler);
+            } else {
+                stateMap.remove(notification);
+                handler.handle(Future.failedFuture(error));
+            }
+        } else {
+            stateMap.remove(notification);
+            handler.handle(Future.failedFuture(error));
+        }
+    }
+
+    private void retryNotification(GcmNotification notification, Handler<AsyncResult<GcmResponse>> handler) {
+        stateMap.get(notification).updateLastTry();
+        doSendNotification(notification, handler);
+    }
+
+    private class NotificationState {
+        int tries = 0, secondsPassed = 0;
+        LocalDateTime lastSent;
+
+        NotificationState() {
+            lastSent = LocalDateTime.now();
+        }
+
+        void updateLastTry() {
+            LocalDateTime now = LocalDateTime.now();
+            Duration timeElapsed = Duration.between(lastSent, now);
+            secondsPassed += timeElapsed.getSeconds();
+            lastSent = now;
+            tries++;
+        }
+
+        boolean hasExpired() {
+            return secondsPassed >= GcmServiceImpl.this.config.getBackoffMaxSeconds()
+                    || tries >= GcmServiceImpl.this.config.getBackoffRetries();
+        }
     }
 
 }

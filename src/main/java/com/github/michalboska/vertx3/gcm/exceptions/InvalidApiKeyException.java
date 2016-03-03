@@ -11,4 +11,8 @@ public class InvalidApiKeyException extends GcmHttpException {
         this.statusString = statusMessage;
     }
 
+    @Override
+    public boolean shouldRetry() {
+        return false;
+    }
 }

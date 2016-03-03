@@ -25,7 +25,7 @@ public class GcmServiceConfig {
     String address = GcmService.class.getName();
     Integer registrationIdsLimit = 1000;
     Integer maxSecondsToLeave = 2419200;
-    Integer backoffRetries = 5;
+    Integer backoffRetries = 0;
     Integer backoffMaxSeconds = 600;
     Boolean localOnly = false;
 
