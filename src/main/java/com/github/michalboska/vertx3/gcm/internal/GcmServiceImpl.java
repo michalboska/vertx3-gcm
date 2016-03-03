@@ -16,7 +16,6 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
 
     private GcmServiceConfig config;
     private GcmServiceVertxProxyHandler handler;
-    private MessageConsumer<JsonObject> messageConsumer;
 
     private boolean started = false;
     private GcmHttpClient httpClient;
@@ -54,11 +53,17 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
     private void doStart(Future<Void> startFuture) {
         config.checkState();
         handler = new GcmServiceVertxProxyHandler(vertx, this);
-        messageConsumer = config.getLocalOnly() ? handler.registerLocalHandler(config.getAddress()) : handler.registerHandler(config.getAddress());
         httpClient = new GcmHttpClient(vertx, config);
-        started = true;
-        LOGGER.info(String.format("GCM Client service started and listening on EventBus address: %s", config.getAddress()));
-        startFuture.complete();
+        MessageConsumer<JsonObject> messageConsumer = config.getLocalOnly() ? handler.registerLocalHandler(config.getAddress()) : handler.registerHandler(config.getAddress());
+        messageConsumer.completionHandler(ar -> {
+            if (ar.succeeded()) {
+                started = true;
+                LOGGER.info(String.format("GCM Client service started and listening on EventBus address: %s", config.getAddress()));
+                startFuture.complete();
+            } else {
+                startFuture.fail(ar.cause());
+            }
+        });
     }
 
     @Override

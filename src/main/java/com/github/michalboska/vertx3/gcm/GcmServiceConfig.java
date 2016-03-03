@@ -13,6 +13,7 @@ public class GcmServiceConfig {
     private static String JSON_REGLIMIT = "registrationIdsLimit";
     private static String JSON_MAXSEXONDS = "maxSecondsToLeave";
     private static String JSON_BACKOFF_RETRIES = "backoffRetries";
+    private static String JSON_BACKOFF_MAX_SECONDS = "backoffRetries";
     private static String JSON_API_KEY = "apiKey";
     private static String JSON_ADDRESS = "address";
     private static String JSON_LOCAL_ONLY = "localOnly";
@@ -25,6 +26,7 @@ public class GcmServiceConfig {
     Integer registrationIdsLimit = 1000;
     Integer maxSecondsToLeave = 2419200;
     Integer backoffRetries = 5;
+    Integer backoffMaxSeconds = 600;
     Boolean localOnly = false;
 
     public GcmServiceConfig() {
@@ -39,10 +41,11 @@ public class GcmServiceConfig {
         this.apiKey = apiKey;
     }
 
-    public GcmServiceConfig(Integer registrationIdsLimit, Integer maxSecondsToLeave, Integer backoffRetries, String apiKey, String address, Boolean localOnly) {
+    public GcmServiceConfig(Integer registrationIdsLimit, Integer maxSecondsToLeave, Integer backoffRetries, Integer backoffMaxSeconds, String apiKey, String address, Boolean localOnly) {
         this.registrationIdsLimit = registrationIdsLimit;
         this.maxSecondsToLeave = maxSecondsToLeave;
         this.backoffRetries = backoffRetries;
+        this.backoffMaxSeconds = backoffMaxSeconds;
         this.apiKey = apiKey;
         this.address = address;
         this.localOnly = localOnly;
@@ -52,6 +55,7 @@ public class GcmServiceConfig {
         this(copyConfig.getRegistrationIdsLimit(),
                 copyConfig.getMaxSecondsToLeave(),
                 copyConfig.getBackoffRetries(),
+                copyConfig.getBackoffMaxSeconds(),
                 copyConfig.getApiKey(),
                 copyConfig.getAddress(),
                 copyConfig.getLocalOnly());
@@ -61,6 +65,7 @@ public class GcmServiceConfig {
         this(jsonObject.getInteger(JSON_REGLIMIT),
                 jsonObject.getInteger(JSON_MAXSEXONDS),
                 jsonObject.getInteger(JSON_BACKOFF_RETRIES),
+                jsonObject.getInteger(JSON_BACKOFF_MAX_SECONDS),
                 jsonObject.getString(JSON_API_KEY),
                 jsonObject.getString(JSON_ADDRESS),
                 jsonObject.getBoolean(JSON_LOCAL_ONLY));
@@ -71,6 +76,7 @@ public class GcmServiceConfig {
                 .put(JSON_REGLIMIT, registrationIdsLimit)
                 .put(JSON_MAXSEXONDS, maxSecondsToLeave)
                 .put(JSON_BACKOFF_RETRIES, backoffRetries)
+                .put(JSON_BACKOFF_MAX_SECONDS, backoffMaxSeconds)
                 .put(JSON_API_KEY, apiKey)
                 .put(JSON_ADDRESS, address)
                 .put(JSON_LOCAL_ONLY, localOnly);
@@ -133,6 +139,15 @@ public class GcmServiceConfig {
 
     public GcmServiceConfig setLocalOnly(Boolean localOnly) {
         this.localOnly = localOnly;
+        return this;
+    }
+
+    public Integer getBackoffMaxSeconds() {
+        return backoffMaxSeconds;
+    }
+
+    public GcmServiceConfig setBackoffMaxSeconds(Integer backoffMaxSeconds) {
+        this.backoffMaxSeconds = backoffMaxSeconds;
         return this;
     }
 }
