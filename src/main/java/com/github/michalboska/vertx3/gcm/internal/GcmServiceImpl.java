@@ -8,6 +8,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
+import io.vertx.rx.java.ObservableHandler;
+import io.vertx.rx.java.RxHelper;
 import org.apache.commons.lang3.Validate;
 
 import java.time.Duration;
@@ -41,7 +43,19 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        doStart(startFuture);
+        config.checkState();
+        httpClient = new GcmHttpClient(vertx, config);
+        handler = new GcmServiceVertxProxyHandler(vertx, this);
+        MessageConsumer<JsonObject> messageConsumer = config.getLocalOnly() ? handler.registerLocalHandler(config.getAddress()) : handler.registerHandler(config.getAddress());
+        messageConsumer.completionHandler(ar -> {
+            if (ar.succeeded()) {
+                started = true;
+                LOGGER.info(String.format("GCM Client service started and listening on EventBus address: %s", config.getAddress()));
+                startFuture.complete();
+            } else {
+                startFuture.fail(ar.cause());
+            }
+        });
     }
 
     /**
@@ -55,23 +69,9 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
     public void startLocally(Vertx vertx, Future<Void> startFuture) throws Exception {
         this.vertx = vertx;
         this.context = vertx.getOrCreateContext();
-        doStart(startFuture);
-    }
-
-    private void doStart(Future<Void> startFuture) {
         config.checkState();
-        handler = new GcmServiceVertxProxyHandler(vertx, this);
         httpClient = new GcmHttpClient(vertx, config);
-        MessageConsumer<JsonObject> messageConsumer = config.getLocalOnly() ? handler.registerLocalHandler(config.getAddress()) : handler.registerHandler(config.getAddress());
-        messageConsumer.completionHandler(ar -> {
-            if (ar.succeeded()) {
-                started = true;
-                LOGGER.info(String.format("GCM Client service started and listening on EventBus address: %s", config.getAddress()));
-                startFuture.complete();
-            } else {
-                startFuture.fail(ar.cause());
-            }
-        });
+        startFuture.complete();
     }
 
     @Override
@@ -79,67 +79,73 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         Validate.validState(started, "Service instance has not been started. " +
                 "When running this service locally (not as a separately deployed Verticle), use the startLocally method first");
         Validate.validState(stateMap.get(notification) == null, "The supplied GCM notification is already being processed");
-        stateMap.put(notification, new NotificationState(handler));
-        doSendNotification(notification, handler);
+        Future<GcmResponse> futureToComplete = Future.<GcmResponse>future().setHandler(handler);
+        stateMap.put(notification, new NotificationState(futureToComplete));
+        ObservableFuture<GcmResponse> requestFuture = httpClient.doRequest(notification);
+        requestFuture.subscribe(response -> {
+            handleSuccess(notification, response);
+        }, throwable -> {
+            handleError(notification, throwable);
+        });
         return this;
     }
 
-    private void doSendNotification(GcmNotification notification, Handler<AsyncResult<GcmResponse>> handler) {
-        ObservableFuture<GcmResponse> future = httpClient.doRequest(notification);
-        future.subscribe(response -> {
-            handleSuccess(notification, response, handler);
-        }, throwable -> {
-            handleError(notification, throwable, handler);
-        });
-    }
-
-    private void handleSuccess(GcmNotification notification, GcmResponse response, Handler<AsyncResult<GcmResponse>> handler) {
+    private void handleSuccess(GcmNotification notification, GcmResponse response) {
         NotificationState state = stateMap.get(notification);
-        Set<String> deviceIdsToRetry = response.getDeviceIdsToRetry();
+        Future<GcmResponse> responseFuture = state.completionFuture;
         state.updateLastTry(response);
+
         //If all device IDs have succeeded, or the notification has already taken too long, or there are errors, but none of them is retriable,
         //just give up and return what we got
+        Set<String> deviceIdsToRetry = response.getDeviceIdsToRetry();
         if (response.getFailureCount() == 0 || deviceIdsToRetry.isEmpty() || state.hasExpired()) {
             stateMap.remove(notification);
-            handler.handle(Future.succeededFuture(response));
+            responseFuture.complete(response);
         } else {
             GcmNotification notificationToRetry = notification.copyWithDeviceIdList(deviceIdsToRetry);
-            retryNotification(notification, notificationToRetry, handler);
+            retryNotification(notification, notificationToRetry);
         }
     }
 
-    private void handleError(GcmNotification notification, Throwable error, Handler<AsyncResult<GcmResponse>> handler) {
+    private void handleError(GcmNotification notification, Throwable error) {
+        NotificationState state = stateMap.get(notification);
+        state.updateLastTry(null);
         if (error instanceof GcmHttpException) {
             GcmHttpException httpException = (GcmHttpException) error;
-            NotificationState state = stateMap.get(notification);
-            state.updateLastTry(null);
             if (httpException.shouldRetry() && !state.hasExpired()) {
-                retryNotification(notification, notification, handler);
+                retryNotification(notification, notification);
             } else {
                 stateMap.remove(notification);
-                handler.handle(Future.failedFuture(error));
+                state.completionFuture.fail(error);
             }
         } else {
             stateMap.remove(notification);
-            handler.handle(Future.failedFuture(error));
+            state.completionFuture.fail(error);
         }
     }
 
-    private void retryNotification(GcmNotification notification, GcmNotification retryNotification, Handler<AsyncResult<GcmResponse>> handler) {
-
-        doSendNotification(notification, handler);
-
+    private void retryNotification(GcmNotification originalNotification, GcmNotification retryWithNotification) {
+        NotificationState state = stateMap.get(originalNotification);
+        ObservableHandler<Long> timerHandler = RxHelper.observableHandler(false);
+        vertx.setTimer(state.secondsIncrement * 1000, timerHandler.toHandler());
+        timerHandler
+                .concatMap((timerId) -> httpClient.doRequest(retryWithNotification))
+                .subscribe(response -> {
+                    handleSuccess(originalNotification, response);
+                }, error -> {
+                    handleError(originalNotification, error);
+                });
     }
 
     private class NotificationState {
         int tries = 0, totalSecondsPassed = 0, secondsIncrement = 2;
         LocalDateTime lastSent;
         GcmResponse currentResponse;
-        private Handler<AsyncResult<GcmResponse>> completionHandler;
+        private Future<GcmResponse> completionFuture;
 
-        NotificationState(Handler<AsyncResult<GcmResponse>> completionHandler) {
+        NotificationState(Future<GcmResponse> completionFuture) {
             lastSent = LocalDateTime.now();
-            this.completionHandler = completionHandler;
+            this.completionFuture = completionFuture;
         }
 
         void updateLastTry(GcmResponse newResponse) {
@@ -148,6 +154,7 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
             totalSecondsPassed += timeElapsed.getSeconds();
             lastSent = now;
             tries++;
+            secondsIncrement *= 2;
             if (currentResponse == null) {
                 currentResponse = newResponse;
             } else if (newResponse != null) {
@@ -156,7 +163,7 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         }
 
         boolean hasExpired() {
-            return totalSecondsPassed >= GcmServiceImpl.this.config.getBackoffMaxSeconds()
+            return totalSecondsPassed + secondsIncrement >= GcmServiceImpl.this.config.getBackoffMaxSeconds()
                     || tries >= GcmServiceImpl.this.config.getBackoffRetries();
         }
     }
