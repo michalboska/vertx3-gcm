@@ -79,7 +79,7 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         Validate.validState(started, "Service instance has not been started. " +
                 "When running this service locally (not as a separately deployed Verticle), use the startLocally method first");
         Validate.validState(stateMap.get(notification) == null, "The supplied GCM notification is already being processed");
-        stateMap.put(notification, new NotificationState());
+        stateMap.put(notification, new NotificationState(handler));
         doSendNotification(notification, handler);
         return this;
     }
@@ -103,9 +103,8 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
             stateMap.remove(notification);
             handler.handle(Future.succeededFuture(response));
         } else {
-            GcmNotification retryNotification = notification.copyWithDeviceIdList(deviceIdsToRetry);
-            doSendNotification(retryNotification, );
-
+            GcmNotification notificationToRetry = notification.copyWithDeviceIdList(deviceIdsToRetry);
+            retryNotification(notification, notificationToRetry, handler);
         }
     }
 
@@ -113,9 +112,9 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         if (error instanceof GcmHttpException) {
             GcmHttpException httpException = (GcmHttpException) error;
             NotificationState state = stateMap.get(notification);
+            state.updateLastTry(null);
             if (httpException.shouldRetry() && !state.hasExpired()) {
-                state.updateLastTry(null);
-                doSendNotification(notification, handler);
+                retryNotification(notification, notification, handler);
             } else {
                 stateMap.remove(notification);
                 handler.handle(Future.failedFuture(error));
@@ -126,23 +125,27 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         }
     }
 
-    private void retryNotification() {
+    private void retryNotification(GcmNotification notification, GcmNotification retryNotification, Handler<AsyncResult<GcmResponse>> handler) {
+
+        doSendNotification(notification, handler);
 
     }
 
     private class NotificationState {
-        int tries = 0, secondsPassed = 0;
+        int tries = 0, totalSecondsPassed = 0, secondsIncrement = 2;
         LocalDateTime lastSent;
         GcmResponse currentResponse;
+        private Handler<AsyncResult<GcmResponse>> completionHandler;
 
-        NotificationState() {
+        NotificationState(Handler<AsyncResult<GcmResponse>> completionHandler) {
             lastSent = LocalDateTime.now();
+            this.completionHandler = completionHandler;
         }
 
         void updateLastTry(GcmResponse newResponse) {
             LocalDateTime now = LocalDateTime.now();
             Duration timeElapsed = Duration.between(lastSent, now);
-            secondsPassed += timeElapsed.getSeconds();
+            totalSecondsPassed += timeElapsed.getSeconds();
             lastSent = now;
             tries++;
             if (currentResponse == null) {
@@ -153,7 +156,7 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         }
 
         boolean hasExpired() {
-            return secondsPassed >= GcmServiceImpl.this.config.getBackoffMaxSeconds()
+            return totalSecondsPassed >= GcmServiceImpl.this.config.getBackoffMaxSeconds()
                     || tries >= GcmServiceImpl.this.config.getBackoffRetries();
         }
     }
