@@ -13,7 +13,7 @@ public class GcmServiceConfig {
     private static String JSON_REGLIMIT = "registrationIdsLimit";
     private static String JSON_MAXSEXONDS = "maxSecondsToLeave";
     private static String JSON_BACKOFF_RETRIES = "backoffRetries";
-    private static String JSON_BACKOFF_MAX_SECONDS = "backoffRetries";
+    private static String JSON_BACKOFF_MAX_SECONDS = "backoffMaxSeconds";
     private static String JSON_API_KEY = "apiKey";
     private static String JSON_ADDRESS = "address";
     private static String JSON_LOCAL_ONLY = "localOnly";
