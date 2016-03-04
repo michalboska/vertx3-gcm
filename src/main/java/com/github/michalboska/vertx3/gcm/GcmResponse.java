@@ -131,6 +131,33 @@ public class GcmResponse {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Merge results of other GCM response into this one.
+     * Results for device IDs that are contained in this instance will by overwritten by results from {@code otherResponse}
+     * and counts will be recalculated. Mutates the current instance.
+     *
+     * @return this instance for fluent API
+     */
+    public GcmResponse mergeResponse(GcmResponse otherResponse) {
+        otherResponse.getDeviceResults()
+                .entrySet()
+                .forEach(entry -> deviceResults.put(entry.getKey(), entry.getValue()));
+        successCount = 0;
+        failureCount = 0;
+        canonicalIdCount = 0;
+        deviceResults.forEach((String deviceId, SingleMessageResult singleMessageResult) -> {
+            if (singleMessageResult.getSuccess()) {
+                successCount++;
+            } else {
+                failureCount++;
+            }
+            if (singleMessageResult.getRegistrationId() != null) {
+                canonicalIdCount++;
+            }
+        });
+        return this;
+    }
+
     public Long getMulticastId() {
         return multicastId;
     }

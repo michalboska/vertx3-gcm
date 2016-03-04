@@ -93,6 +93,7 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
     }
 
     private void handleSuccess(GcmNotification notification, GcmResponse response, Handler<AsyncResult<GcmResponse>> handler) {
+
         handler.handle(Future.succeededFuture(response));
         //TODO: Parse the response, if there is any error result and we are configured to retry, then retry only those failed
     }

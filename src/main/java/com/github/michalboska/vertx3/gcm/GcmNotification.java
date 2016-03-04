@@ -6,8 +6,10 @@ import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Michal Boska
@@ -96,6 +98,21 @@ public class GcmNotification {
             result.put(JSON_DRY_RUN, dryRun);
         }
         return result;
+    }
+
+    /**
+     * Creates a copy of this notification with modified device ID list
+     *
+     * @return
+     */
+    public GcmNotification withDeviceIdList(Set<String> newDeviceIds) {
+        return new GcmNotification(new ArrayList<>(newDeviceIds),
+                collapseKey,
+                data,
+                delayWhileIdle,
+                ttlSeconds,
+                restrictPackageName,
+                dryRun);
     }
 
     public GcmNotification checkState() throws IllegalStateException {
