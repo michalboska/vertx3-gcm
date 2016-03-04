@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 
 public class GcmServiceImpl extends AbstractVerticle implements GcmService {
@@ -86,16 +87,26 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
     private void doSendNotification(GcmNotification notification, Handler<AsyncResult<GcmResponse>> handler) {
         ObservableFuture<GcmResponse> future = httpClient.doRequest(notification);
         future.subscribe(response -> {
-            handler.handle(Future.succeededFuture(response));
+            handleSuccess(notification, response, handler);
         }, throwable -> {
             handleError(notification, throwable, handler);
         });
     }
 
     private void handleSuccess(GcmNotification notification, GcmResponse response, Handler<AsyncResult<GcmResponse>> handler) {
+        NotificationState state = stateMap.get(notification);
+        Set<String> deviceIdsToRetry = response.getDeviceIdsToRetry();
+        state.updateLastTry(response);
+        //If all device IDs have succeeded, or the notification has already taken too long, or there are errors, but none of them is retriable,
+        //just give up and return what we got
+        if (response.getFailureCount() == 0 || deviceIdsToRetry.isEmpty() || state.hasExpired()) {
+            stateMap.remove(notification);
+            handler.handle(Future.succeededFuture(response));
+        } else {
+            GcmNotification retryNotification = notification.copyWithDeviceIdList(deviceIdsToRetry);
+            doSendNotification(retryNotification, );
 
-        handler.handle(Future.succeededFuture(response));
-        //TODO: Parse the response, if there is any error result and we are configured to retry, then retry only those failed
+        }
     }
 
     private void handleError(GcmNotification notification, Throwable error, Handler<AsyncResult<GcmResponse>> handler) {
@@ -103,7 +114,8 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
             GcmHttpException httpException = (GcmHttpException) error;
             NotificationState state = stateMap.get(notification);
             if (httpException.shouldRetry() && !state.hasExpired()) {
-                retryNotification(notification, handler);
+                state.updateLastTry(null);
+                doSendNotification(notification, handler);
             } else {
                 stateMap.remove(notification);
                 handler.handle(Future.failedFuture(error));
@@ -114,25 +126,30 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         }
     }
 
-    private void retryNotification(GcmNotification notification, Handler<AsyncResult<GcmResponse>> handler) {
-        stateMap.get(notification).updateLastTry();
-        doSendNotification(notification, handler);
+    private void retryNotification() {
+
     }
 
     private class NotificationState {
         int tries = 0, secondsPassed = 0;
         LocalDateTime lastSent;
+        GcmResponse currentResponse;
 
         NotificationState() {
             lastSent = LocalDateTime.now();
         }
 
-        void updateLastTry() {
+        void updateLastTry(GcmResponse newResponse) {
             LocalDateTime now = LocalDateTime.now();
             Duration timeElapsed = Duration.between(lastSent, now);
             secondsPassed += timeElapsed.getSeconds();
             lastSent = now;
             tries++;
+            if (currentResponse == null) {
+                currentResponse = newResponse;
+            } else if (newResponse != null) {
+                currentResponse.mergeResponse(newResponse);
+            }
         }
 
         boolean hasExpired() {

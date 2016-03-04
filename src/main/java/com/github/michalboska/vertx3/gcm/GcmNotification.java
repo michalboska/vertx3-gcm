@@ -105,7 +105,7 @@ public class GcmNotification {
      *
      * @return
      */
-    public GcmNotification withDeviceIdList(Set<String> newDeviceIds) {
+    public GcmNotification copyWithDeviceIdList(Set<String> newDeviceIds) {
         return new GcmNotification(new ArrayList<>(newDeviceIds),
                 collapseKey,
                 data,
