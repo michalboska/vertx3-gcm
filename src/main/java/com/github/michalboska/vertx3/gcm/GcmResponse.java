@@ -100,7 +100,7 @@ public class GcmResponse {
      * @return A map of (old registration id -> new registration id) entries
      * @see <a href="https://developers.google.com/cloud-messaging/registration#canonical-ids">GCM documentation - Canonical IDs</a>
      */
-    public Map<String, String> getRegistrationIdReplacements() {
+    public Map<String, String> getCanonicalIdsMap() {
         if (this.canonicalIdCount == 0) {
             return Collections.emptyMap();
         }
