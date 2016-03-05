@@ -66,11 +66,12 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
      * @param startFuture
      * @throws Exception
      */
-    public void startLocally(Vertx vertx, Future<Void> startFuture) throws Exception {
+    public void startLocally(Vertx vertx, Future<Void> startFuture) {
         this.vertx = vertx;
         this.context = vertx.getOrCreateContext();
         config.checkState();
         httpClient = new GcmHttpClient(vertx, config);
+        started = true;
         startFuture.complete();
     }
 
@@ -122,6 +123,15 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
             stateMap.remove(notification);
             state.completionFuture.fail(error);
         }
+    }
+
+    /**
+     * Allows to inject mocked http client instead of the default one. Use only when testing.
+     *
+     * @param httpClient
+     */
+    void injectHttpClient(GcmHttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 
     private void retryNotification(GcmNotification originalNotification, GcmNotification retryWithNotification) {
