@@ -80,6 +80,10 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         Validate.validState(started, "Service instance has not been started. " +
                 "When running this service locally (not as a separately deployed Verticle), use the startLocally method first");
         Validate.validState(stateMap.get(notification) == null, "The supplied GCM notification is already being processed");
+        Validate.inclusiveBetween(1,
+                config.getRegistrationIdsLimit().longValue(),
+                notification.getRegistrationIds().size(),
+                String.format("You must supply between 1 and %d device IDs", config.getRegistrationIdsLimit()));
         Future<GcmResponse> futureToComplete = Future.<GcmResponse>future().setHandler(handler);
         stateMap.put(notification, new NotificationState(futureToComplete));
         ObservableFuture<GcmResponse> requestFuture = httpClient.doRequest(notification);
