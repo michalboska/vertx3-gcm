@@ -129,15 +129,6 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         }
     }
 
-    /**
-     * Allows to inject mocked http client instead of the default one. Use only when testing.
-     *
-     * @param httpClient
-     */
-    void injectHttpClient(GcmHttpClient httpClient) {
-        this.httpClient = httpClient;
-    }
-
     private void retryNotification(GcmNotification originalNotification, GcmNotification retryWithNotification) {
         NotificationState state = stateMap.get(originalNotification);
         ObservableHandler<Long> timerHandler = RxHelper.observableHandler(false);
@@ -149,6 +140,15 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
                 }, error -> {
                     handleError(originalNotification, error);
                 });
+    }
+
+    /**
+     * Allows to inject mocked http client instead of the default one. Use only when testing.
+     *
+     * @param httpClient
+     */
+    void injectHttpClient(GcmHttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 
     private class NotificationState {
