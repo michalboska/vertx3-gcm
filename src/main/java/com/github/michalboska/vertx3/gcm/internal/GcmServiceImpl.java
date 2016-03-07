@@ -11,6 +11,8 @@ import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rx.java.ObservableHandler;
 import io.vertx.rx.java.RxHelper;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -177,8 +179,19 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         }
 
         boolean hasExpired() {
-            return totalSecondsPassed + secondsIncrement >= GcmServiceImpl.this.config.getBackoffMaxSeconds()
-                    || tries >= GcmServiceImpl.this.config.getBackoffRetries();
+            GcmServiceImpl implInstance = GcmServiceImpl.this;
+            if (implInstance.config.getBackoffMaxSeconds() != null && totalSecondsPassed + secondsIncrement >= implInstance.config.getBackoffMaxSeconds()) {
+                return true;
+            }
+            if (implInstance.config.getBackoffRetries() != null && tries >= implInstance.config.getBackoffRetries()) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
         }
     }
 

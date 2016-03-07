@@ -21,8 +21,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
 
 /**
@@ -50,7 +50,7 @@ public class GcmServiceImplMockedTest extends AbstractUnitTest {
         gcmService.injectHttpClient(httpClient);
 
         GcmServiceConfig retryConfig = new GcmServiceConfig("apiKey")
-                .setBackoffMaxSeconds(20)
+                .setBackoffMaxSeconds(10)
                 .setBackoffRetries(5);
         gcmServiceWithRetry = new GcmServiceImpl(retryConfig);
         gcmServiceWithRetry.startLocally(runWithVertxRule.vertx(), Future.future());
@@ -98,13 +98,15 @@ public class GcmServiceImplMockedTest extends AbstractUnitTest {
         }));
     }
 
-    @Test
-    public void testRecoverableServerErrorWithRetry(TestContext context) {
-        ObservableFuture<Object> future = RxHelper.observableFuture();
-        Future.failedFuture(new GcmHttpException(500, "Server error")).setHandler(future.toHandler());
-        doReturn(future).when(httpClient).doRequest(any());
-        gcmServiceWithRetry.sendNotification(mixedNotification, context.asyncAssertSuccess(result -> {
-            context.assertEquals(mixedResponse, result);
+    @Test(timeout = 20000)
+    public void testRecoverableServerErrorWithRetryFailAnyway(TestContext context) {
+        when(httpClient.doRequest(any())).thenAnswer(invocationOnMock -> {
+            ObservableFuture<Object> future = RxHelper.observableFuture();
+            Future.failedFuture(new GcmHttpException(500, "Server error")).setHandler(future.toHandler());
+            return future;
+        });
+        gcmServiceWithRetry.sendNotification(mixedNotification, context.asyncAssertFailure(error -> {
+            context.assertEquals(GcmHttpException.class, error.getClass());
         }));
     }
 
