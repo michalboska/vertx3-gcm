@@ -27,7 +27,7 @@ public class GcmResponse {
     private Map<String, SingleMessageResult> deviceResults;
 
     public GcmResponse() {
-        deviceResults = Collections.emptyMap();
+        deviceResults = new HashMap<>();
     }
 
     public GcmResponse(GcmResponse copyResponse) {

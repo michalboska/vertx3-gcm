@@ -10,6 +10,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rx.java.ObservableHandler;
 import io.vertx.rx.java.RxHelper;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -18,6 +19,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 
@@ -35,7 +37,6 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
     public GcmServiceImpl(GcmServiceConfig config) {
         config.checkState();
         this.config = config;
-        LOGGER.info("Instance created");
     }
 
     public GcmServiceImpl() {
@@ -107,7 +108,7 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         Set<String> deviceIdsToRetry = response.getDeviceIdsToRetry();
         if (response.getFailureCount() == 0 || deviceIdsToRetry.isEmpty() || state.hasExpired()) {
             stateMap.remove(notification);
-            responseFuture.complete(response);
+            responseFuture.complete(state.currentResponse);
         } else {
             GcmNotification notificationToRetry = notification.copyWithDeviceIdList(deviceIdsToRetry);
             retryNotification(notification, notificationToRetry);
@@ -157,7 +158,8 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         int tries = 0, totalSecondsPassed = 0, secondsIncrement = 2;
         LocalDateTime lastSent;
         GcmResponse currentResponse;
-        private Future<GcmResponse> completionFuture;
+        Future<GcmResponse> completionFuture;
+        private Random random = new Random();
 
         NotificationState(Future<GcmResponse> completionFuture) {
             lastSent = LocalDateTime.now();
@@ -170,7 +172,7 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
             totalSecondsPassed += timeElapsed.getSeconds();
             lastSent = now;
             tries++;
-            secondsIncrement *= 2;
+            secondsIncrement = secondsIncrement * 2 + calculateRandomSpread();
             if (currentResponse == null) {
                 currentResponse = newResponse;
             } else if (newResponse != null) {
@@ -180,6 +182,11 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
 
         boolean hasExpired() {
             GcmServiceImpl implInstance = GcmServiceImpl.this;
+            //if no config options regarding retry have been set, consider retrying as disabled, therefore the state is always expired.
+            //we need to do that to prevent infinite retries (having both parameters null would result in infinite retries otherwise)
+            if (implInstance.config.getBackoffMaxSeconds() == null && implInstance.config.getBackoffRetries() == null) {
+                return true;
+            }
             if (implInstance.config.getBackoffMaxSeconds() != null && totalSecondsPassed + secondsIncrement >= implInstance.config.getBackoffMaxSeconds()) {
                 return true;
             }
@@ -192,6 +199,16 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         @Override
         public String toString() {
             return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        }
+
+        private int calculateRandomSpread() {
+            int halfInterval = (secondsIncrement / 2) + 1;
+            int quarterInterval = halfInterval / 2;
+            if (halfInterval <= 2) {
+                halfInterval = 2;
+                quarterInterval = 1;
+            }
+            return random.nextInt(halfInterval) - quarterInterval; //values from -1/4 to 1/4 of secondsIncrement
         }
     }
 
