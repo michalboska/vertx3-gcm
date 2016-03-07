@@ -127,7 +127,7 @@ public class GcmServiceImplMockedTest extends AbstractUnitTest {
     }
 
     @Test(timeout = 20000)
-    public void testServerErrorWithRetryEventuallySucceedPartially(TestContext context) {
+    public void testServerErrorWithRetryShouldEventuallySucceedPartially(TestContext context) {
         executeMockTest((notification, counter) -> {
             List<String> registrationIds = notification.getRegistrationIds();
             Map<String, SingleMessageResult> resultMap = new HashMap<>();
@@ -173,6 +173,49 @@ public class GcmServiceImplMockedTest extends AbstractUnitTest {
                         }
                         return true;
                     }), "After running this test case, only device 'g' should have a recoverable error");
+        }));
+    }
+
+    @Test(timeout = 20000)
+    public void testServerErrorWithRetryShouldEventuallySucceedCompletely(TestContext context) {
+        executeMockTest((notification, counter) -> {
+            List<String> registrationIds = notification.getRegistrationIds();
+            Map<String, SingleMessageResult> resultMap = new HashMap<>();
+            switch (counter) {
+                case 1:
+                    context.assertEquals(notification, mixedNotification);
+                    return mixedResultMap;
+                case 2:
+                    context.assertEquals(3, registrationIds.size());
+                    context.assertTrue(registrationIds.contains("g"));
+                    context.assertTrue(registrationIds.contains("h"));
+                    context.assertTrue(registrationIds.contains("i"));
+                    resultMap.put("g", new SingleMessageResult("gMsg", null, SingleMessageErrorType.INTERNAL_SERVER_ERROR));
+                    resultMap.put("h", new SingleMessageResult("hMsg", null, SingleMessageErrorType.UNAVAILABLE));
+                    resultMap.put("i", new SingleMessageResult("iMsg", null, null)); //succeed
+                    break;
+                case 3:
+                    context.assertEquals(2, registrationIds.size());
+                    context.assertTrue(registrationIds.contains("g"));
+                    context.assertTrue(registrationIds.contains("h"));
+                    resultMap.put("g", new SingleMessageResult("gMsg", null, null)); //succeed
+                    resultMap.put("h", new SingleMessageResult("hMsg", null, null)); //succeed
+                    break;
+                default: //all further requests
+                    context.fail("Should not make further HTTP requests as all device IDs have, as of now, been notified successfully.");
+                    break;
+            }
+            return resultMap;
+        });
+        gcmServiceWithRetry.sendNotification(mixedNotification, context.asyncAssertSuccess(result -> {
+            Map<String, SingleMessageResult> deviceResults = result.getDeviceResults();
+            context.assertEquals(mixedResultMap.size(), deviceResults.size());
+
+            context.assertTrue(deviceResults
+                            .entrySet()
+                            .stream()
+                            .allMatch(entry -> entry.getValue().getSuccess() || !entry.getValue().getError().shouldRetry()),
+                    "All device IDs should have finished successfully or with a definitive (non-retriable) error");
         }));
     }
 
