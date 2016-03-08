@@ -27,13 +27,21 @@
 |===
 ^|Name | Type ^| Description
 |[[address]]`address`|`String`|-
-|[[apiKey]]`apiKey`|`String`|-
+|[[apiKey]]`apiKey`|`String`|
++++
+API key to authenticate with against GCM HTTP servers. See <a href="https://developers.google.com/cloud-messaging/http#auth">GCM documentation</a>.
+ Required parameter.
++++
 |[[backoffMaxSeconds]]`backoffMaxSeconds`|`Number (Integer)`|-
-|[[backoffRetries]]`backoffRetries`|`Number (Integer)`|-
+|[[backoffRetries]]`backoffRetries`|`Number (Integer)`|
++++
+Maximum number of attempts the GCM service can make to retry a recoverable error received from the GCM server.
+ This applies to global errors (such as recoverable HTTP-500) as well as recoverable errors per device-id
++++
 |[[localOnly]]`localOnly`|`Boolean`|-
 |[[maxSecondsToLeave]]`maxSecondsToLeave`|`Number (Integer)`|
 +++
-Maximum number of seconds that can be sent as notification's link <code>ttlSeconds</code> parameter
+Maximum number of seconds that can be sent as notification's <code>ttlSeconds</code> parameter
 +++
 |[[registrationIdsLimit]]`registrationIdsLimit`|`Number (Integer)`|
 +++

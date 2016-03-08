@@ -102,7 +102,7 @@ public class GcmServiceConfig {
     }
 
     /**
-     * Maximum number of seconds that can be sent as notification's {@link GcmNotification#getTtlSeconds() ttlSeconds} {@code ttlSeconds} parameter
+     * Maximum number of seconds that can be sent as notification's {@code ttlSeconds} parameter
      * @return
      */
     public Integer getMaxSecondsToLeave() {
@@ -114,6 +114,12 @@ public class GcmServiceConfig {
         return this;
     }
 
+    /**
+     * Maximum number of attempts the GCM service can make to retry a recoverable error received from the GCM server.
+     * This applies to global errors (such as recoverable HTTP-500) as well as recoverable errors per device-id
+     *
+     * @return
+     */
     public Integer getBackoffRetries() {
         return backoffRetries;
     }
@@ -123,6 +129,11 @@ public class GcmServiceConfig {
         return this;
     }
 
+    /**
+     * API key to authenticate with against GCM HTTP servers. See <a href="https://developers.google.com/cloud-messaging/http#auth">GCM documentation</a>.
+     * Required parameter.
+     * @return
+     */
     public String getApiKey() {
         return apiKey;
     }
