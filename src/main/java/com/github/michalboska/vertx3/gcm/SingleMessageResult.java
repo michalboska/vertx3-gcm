@@ -4,10 +4,10 @@ package com.github.michalboska.vertx3.gcm;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
-@DataObject
 /**
  * Describes result for a single device ID. GCM returns such result for each device ID the notification has been sent to.
  */
+@DataObject
 public class SingleMessageResult {
 
     private static String JSON_MESSAGE_ID = "message_id";

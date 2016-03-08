@@ -3,6 +3,10 @@
 [[SingleMessageResult]]
 == SingleMessageResult
 
+++++
+ Describes result for a single device ID. GCM returns such result for each device ID the notification has been sent to.
+++++
+'''
 
 [cols=">25%,^25%,50%"]
 [frame="topbot"]
