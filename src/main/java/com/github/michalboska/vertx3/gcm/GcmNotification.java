@@ -131,6 +131,12 @@ public class GcmNotification {
         return this;
     }
 
+    /**
+     * A collapse key used to deliver multiple notifications of the same kind, of which only the latest is visible to the user.
+     *
+     * See <a href="https://developers.google.com/cloud-messaging/http-server-ref#send-downstream">GCM notification JSON syntax</a>
+     * @return
+     */
     public String getCollapseKey() {
         return collapseKey;
     }
@@ -140,6 +146,12 @@ public class GcmNotification {
         return this;
     }
 
+    /**
+     * A custom payload that will be available to the application processing this message on the Android device.
+     *
+     * See <a href="https://developers.google.com/cloud-messaging/http-server-ref#send-downstream">GCM notification JSON syntax</a>
+     * @return
+     */
     public JsonObject getData() {
         return data;
     }
@@ -149,6 +161,12 @@ public class GcmNotification {
         return this;
     }
 
+    /**
+     * Only deliver the notification if the target device is active (waked, screen on)
+     *
+     * See <a href="https://developers.google.com/cloud-messaging/http-server-ref#send-downstream">GCM notification JSON syntax</a>
+     * @return
+     */
     public Boolean getDelayWhileIdle() {
         return delayWhileIdle;
     }
@@ -158,6 +176,12 @@ public class GcmNotification {
         return this;
     }
 
+    /**
+     * How long the message should be queued for delivery (at Google Servers) before discarding it as undeliverable, if delivery was not possible until then.
+     *
+     * See <a href="https://developers.google.com/cloud-messaging/http-server-ref#send-downstream">GCM notification JSON syntax</a>
+     * @return
+     */
     public Long getTtlSeconds() {
         return ttlSeconds;
     }
@@ -167,6 +191,12 @@ public class GcmNotification {
         return this;
     }
 
+    /**
+     * Only send the notification to an application, whose package name matches this value
+     *
+     * See <a href="https://developers.google.com/cloud-messaging/http-server-ref#send-downstream">GCM notification JSON syntax</a>
+     * @return
+     */
     public String getRestrictPackageName() {
         return restrictPackageName;
     }
