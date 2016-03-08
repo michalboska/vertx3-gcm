@@ -88,6 +88,10 @@ public class GcmServiceConfig {
         return this;
     }
 
+    /**
+     * Some comment
+     * @return
+     */
     public Integer getRegistrationIdsLimit() {
         return registrationIdsLimit;
     }
