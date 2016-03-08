@@ -1,0 +1,95 @@
+= Cheatsheets
+
+[[SingleMessageResult]]
+== SingleMessageResult
+
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[error]]`error`|`link:enums.html#SingleMessageErrorType[SingleMessageErrorType]`|-
+|[[messageId]]`messageId`|`String`|-
+|[[registrationId]]`registrationId`|`String`|-
+|[[success]]`success`|`Boolean`|-
+|===
+
+[[GcmServiceConfig]]
+== GcmServiceConfig
+
+++++
+ @author Michal Boska
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[address]]`address`|`String`|-
+|[[apiKey]]`apiKey`|`String`|-
+|[[backoffMaxSeconds]]`backoffMaxSeconds`|`Number (Integer)`|-
+|[[backoffRetries]]`backoffRetries`|`Number (Integer)`|-
+|[[localOnly]]`localOnly`|`Boolean`|-
+|[[maxSecondsToLeave]]`maxSecondsToLeave`|`Number (Integer)`|-
+|[[registrationIdsLimit]]`registrationIdsLimit`|`Number (Integer)`|-
+|===
+
+[[GcmResponse]]
+== GcmResponse
+
+++++
+ @author Michal Boska
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[canonicalIdCount]]`canonicalIdCount`|`Number (Integer)`|-
+|[[canonicalIdsMap]]`canonicalIdsMap`|`String`|
++++
+A convenience method to collect all registration IDs, that have their newer versions available (for the same device) along with those newer IDs.
+ The sender should update its database to use the newer registration ID for the same device in the future.
++++
+|[[deviceIdsToRetry]]`deviceIdsToRetry`|`Array of String`|
++++
+Get a set of device IDs for which a recoverable error has been encountered and it makes sense to retry the operation
+ after a certain delay
++++
+|[[deviceResults]]`deviceResults`|`link:dataobjects.html#SingleMessageResult[SingleMessageResult]`|-
+|[[failureCount]]`failureCount`|`Number (Integer)`|-
+|[[invalidRegistrationIds]]`invalidRegistrationIds`|`Array of String`|
++++
+A convenience method to collect all registration IDs, that were rejected by GCM, because they are invalid.
+ This list does not contain registration IDs that failed due to other reasons than being invalid (for example due to technical difficulties at GCM).
+ <p>
+ IDs returned by this method should presumably be removed from the sender's database.
++++
+|[[multicastId]]`multicastId`|`Number (Long)`|-
+|[[retryAfterSeconds]]`retryAfterSeconds`|`Number (Integer)`|-
+|[[successCount]]`successCount`|`Number (Integer)`|-
+|===
+
+[[GcmNotification]]
+== GcmNotification
+
+++++
+ @author Michal Boska
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[collapseKey]]`collapseKey`|`String`|-
+|[[data]]`data`|`Json object`|-
+|[[delayWhileIdle]]`delayWhileIdle`|`Boolean`|-
+|[[dryRun]]`dryRun`|`Boolean`|-
+|[[registrationIds]]`registrationIds`|`Array of String`|-
+|[[restrictPackageName]]`restrictPackageName`|`String`|-
+|[[ttlSeconds]]`ttlSeconds`|`Number (Long)`|-
+|===
+

@@ -1,7 +1,6 @@
 ### Java template
 *.class
 target/
-src/main/asciidoc/
 src/main/generated/
 src/main/resources/gcm-service-js/
 
