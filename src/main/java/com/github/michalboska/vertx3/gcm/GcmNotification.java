@@ -122,6 +122,10 @@ public class GcmNotification {
         return this;
     }
 
+    /**
+     * A list (without duplicate values) of device IDs (aka. registration IDs or tokens) to send this notification to.
+     * @return
+     */
     public List<String> getRegistrationIds() {
         return registrationIds;
     }
@@ -206,6 +210,14 @@ public class GcmNotification {
         return this;
     }
 
+    /**
+     * Only simulate sending this message, don't actually send it.
+     *
+     * Google servers will still be contacted, only they will discard the message with reporting success if the registration ID is valid
+     *
+     * See <a href="https://developers.google.com/cloud-messaging/http-server-ref#send-downstream">GCM notification JSON syntax</a>
+     * @return
+     */
     public Boolean getDryRun() {
         return dryRun;
     }
