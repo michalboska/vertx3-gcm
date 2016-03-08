@@ -101,6 +101,10 @@ public class GcmServiceConfig {
         return this;
     }
 
+    /**
+     * Maximum number of seconds that can be sent as notification's {@link GcmNotification#getTtlSeconds()} parameter
+     * @return
+     */
     public Integer getMaxSecondsToLeave() {
         return maxSecondsToLeave;
     }

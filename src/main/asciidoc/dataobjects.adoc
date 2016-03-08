@@ -31,10 +31,13 @@
 |[[backoffMaxSeconds]]`backoffMaxSeconds`|`Number (Integer)`|-
 |[[backoffRetries]]`backoffRetries`|`Number (Integer)`|-
 |[[localOnly]]`localOnly`|`Boolean`|-
-|[[maxSecondsToLeave]]`maxSecondsToLeave`|`Number (Integer)`|-
+|[[maxSecondsToLeave]]`maxSecondsToLeave`|`Number (Integer)`|
++++
+Maximum number of seconds that can be sent as notification's link parameter
++++
 |[[registrationIdsLimit]]`registrationIdsLimit`|`Number (Integer)`|
 +++
-Some comment
+Maximum number of registration IDs sent in a single notification. If a notification contains more IDs than this, an exception is thrown.
 +++
 |===
 
