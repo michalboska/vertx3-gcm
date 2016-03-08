@@ -70,7 +70,7 @@ public class SingleMessageResult {
 
     /**
      * New registration ID that should be used in the future instead of the original one used in this request.
-     * @see <a href="https://developers.google.com/cloud-messaging/registration#canonical-ids">Canonical IDs</a>
+     * See <a href="https://developers.google.com/cloud-messaging/registration#canonical-ids">Canonical IDs</a>
      * @return
      */
     public String getRegistrationId() {

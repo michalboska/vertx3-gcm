@@ -20,6 +20,7 @@ Message ID that Google has assigned to this message
 |[[registrationId]]`registrationId`|`String`|
 +++
 New registration ID that should be used in the future instead of the original one used in this request.
+ See <a href="https://developers.google.com/cloud-messaging/registration#canonical-ids">Canonical IDs</a>
 +++
 |[[success]]`success`|`Boolean`|
 +++
