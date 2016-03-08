@@ -10,7 +10,6 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rx.java.ObservableHandler;
 import io.vertx.rx.java.RxHelper;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -83,6 +82,9 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         Validate.validState(started, "Service instance has not been started. " +
                 "When running this service locally (not as a separately deployed Verticle), use the startLocally method first");
         Validate.validState(stateMap.get(notification) == null, "The supplied GCM notification is already being processed");
+        if (notification.getTtlSeconds() != null && config.getMaxSecondsToLeave() != null) {
+            Validate.inclusiveBetween(0, config.getMaxSecondsToLeave(), notification.getTtlSeconds());
+        }
         Validate.inclusiveBetween(1,
                 config.getRegistrationIdsLimit().longValue(),
                 notification.getRegistrationIds().size(),

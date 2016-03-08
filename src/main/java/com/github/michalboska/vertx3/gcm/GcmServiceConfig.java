@@ -89,7 +89,7 @@ public class GcmServiceConfig {
     }
 
     /**
-     * Some comment
+     * Maximum number of registration IDs sent in a single notification. If a notification contains more IDs than this, an exception is thrown.
      * @return
      */
     public Integer getRegistrationIdsLimit() {
