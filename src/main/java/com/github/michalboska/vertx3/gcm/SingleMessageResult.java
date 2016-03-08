@@ -5,6 +5,9 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 @DataObject
+/**
+ * Describes result for a single device ID. GCM returns such result for each device ID the notification has been sent to.
+ */
 public class SingleMessageResult {
 
     private static String JSON_MESSAGE_ID = "message_id";
@@ -42,10 +45,20 @@ public class SingleMessageResult {
                 .put(JSON_ERROR, error.getErrorCode());
     }
 
+    /**
+     * Whether the notification has been successfully queued for delivery on that device.
+     * It doesn't mean the notification has really been delivered.
+     * Also reply with canonical ID is considered successful.
+     * @return
+     */
     public Boolean getSuccess() {
         return this.error == null;
     }
 
+    /**
+     * Message ID that Google has assigned to this message
+     * @return
+     */
     public String getMessageId() {
         return messageId;
     }
@@ -55,6 +68,11 @@ public class SingleMessageResult {
         return this;
     }
 
+    /**
+     * New registration ID that should be used in the future instead of the original one used in this request.
+     * @see <a href="https://developers.google.com/cloud-messaging/registration#canonical-ids">Canonical IDs</a>
+     * @return
+     */
     public String getRegistrationId() {
         return registrationId;
     }

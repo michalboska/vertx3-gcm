@@ -9,9 +9,20 @@
 |===
 ^|Name | Type ^| Description
 |[[error]]`error`|`link:enums.html#SingleMessageErrorType[SingleMessageErrorType]`|-
-|[[messageId]]`messageId`|`String`|-
-|[[registrationId]]`registrationId`|`String`|-
-|[[success]]`success`|`Boolean`|-
+|[[messageId]]`messageId`|`String`|
++++
+Message ID that Google has assigned to this message
++++
+|[[registrationId]]`registrationId`|`String`|
++++
+New registration ID that should be used in the future instead of the original one used in this request.
++++
+|[[success]]`success`|`Boolean`|
++++
+Whether the notification has been successfully queued for delivery on that device.
+ It doesn't mean the notification has really been delivered.
+ Also reply with canonical ID is considered successful.
++++
 |===
 
 [[GcmServiceConfig]]
