@@ -12,7 +12,10 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[error]]`error`|`link:enums.html#SingleMessageErrorType[SingleMessageErrorType]`|-
+|[[error]]`error`|`link:enums.html#SingleMessageErrorType[SingleMessageErrorType]`|
++++
+Error type
++++
 |[[messageId]]`messageId`|`String`|
 +++
 Message ID that Google has assigned to this message
@@ -93,7 +96,11 @@ Maximum number of registration IDs sent in a single notification. If a notificat
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[canonicalIdCount]]`canonicalIdCount`|`Number (Integer)`|-
+|[[canonicalIdCount]]`canonicalIdCount`|`Number (Integer)`|
++++
+Get a total number of canonical IDs in this response.
+ See <a href="https://developers.google.com/cloud-messaging/registration#canonical-ids">Canonical IDs</a>
++++
 |[[canonicalIdsMap]]`canonicalIdsMap`|`String`|
 +++
 A convenience method to collect all registration IDs, that have their newer versions available (for the same device) along with those newer IDs.
@@ -104,7 +111,10 @@ A convenience method to collect all registration IDs, that have their newer vers
 Get a set of device IDs for which a recoverable error has been encountered and it makes sense to retry the operation
  after a certain delay
 +++
-|[[deviceResults]]`deviceResults`|`link:dataobjects.html#SingleMessageResult[SingleMessageResult]`|-
+|[[deviceResults]]`deviceResults`|`link:dataobjects.html#SingleMessageResult[SingleMessageResult]`|
++++
+A map of (Device ID -> SingleMessageResult) pairs
++++
 |[[failureCount]]`failureCount`|`Number (Integer)`|-
 |[[invalidRegistrationIds]]`invalidRegistrationIds`|`Array of String`|
 +++
@@ -114,7 +124,10 @@ A convenience method to collect all registration IDs, that were rejected by GCM,
  IDs returned by this method should presumably be removed from the sender's database.
 +++
 |[[multicastId]]`multicastId`|`Number (Long)`|-
-|[[retryAfterSeconds]]`retryAfterSeconds`|`Number (Integer)`|-
+|[[retryAfterSeconds]]`retryAfterSeconds`|`Number (Integer)`|
++++
+In case of recoverable error, GCM server may sent a retry-after header. Undocumented by Google, not really working yet
++++
 |[[successCount]]`successCount`|`Number (Integer)`|-
 |===
 

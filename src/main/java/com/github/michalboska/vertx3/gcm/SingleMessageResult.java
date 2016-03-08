@@ -82,6 +82,10 @@ public class SingleMessageResult {
         return this;
     }
 
+    /**
+     * Error type
+     * @return
+     */
     public SingleMessageErrorType getError() {
         return error;
     }

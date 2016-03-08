@@ -185,6 +185,11 @@ public class GcmResponse {
         return this;
     }
 
+    /**
+     * Get a total number of canonical IDs in this response.
+     * See <a href="https://developers.google.com/cloud-messaging/registration#canonical-ids">Canonical IDs</a>
+     * @return
+     */
     public Integer getCanonicalIdCount() {
         return canonicalIdCount;
     }
@@ -194,6 +199,10 @@ public class GcmResponse {
         return this;
     }
 
+    /**
+     * A map of (Device ID -> SingleMessageResult) pairs
+     * @return
+     */
     public Map<String, SingleMessageResult> getDeviceResults() {
         return deviceResults;
     }
@@ -225,6 +234,10 @@ public class GcmResponse {
         return result;
     }
 
+    /**
+     * In case of recoverable error, GCM server may sent a retry-after header. Undocumented by Google, not really working yet
+     * @return
+     */
     public Integer getRetryAfterSeconds() {
         return retryAfterSeconds;
     }
