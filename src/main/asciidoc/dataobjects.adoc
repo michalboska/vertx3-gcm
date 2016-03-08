@@ -32,7 +32,10 @@
 |[[backoffRetries]]`backoffRetries`|`Number (Integer)`|-
 |[[localOnly]]`localOnly`|`Boolean`|-
 |[[maxSecondsToLeave]]`maxSecondsToLeave`|`Number (Integer)`|-
-|[[registrationIdsLimit]]`registrationIdsLimit`|`Number (Integer)`|-
+|[[registrationIdsLimit]]`registrationIdsLimit`|`Number (Integer)`|
++++
+Some comment
++++
 |===
 
 [[GcmResponse]]
