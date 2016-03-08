@@ -98,7 +98,7 @@ Maximum number of registration IDs sent in a single notification. If a notificat
 ^|Name | Type ^| Description
 |[[canonicalIdCount]]`canonicalIdCount`|`Number (Integer)`|
 +++
-Get a total number of canonical IDs in this response.
+A total number of canonical IDs in this response.
  See <a href="https://developers.google.com/cloud-messaging/registration#canonical-ids">Canonical IDs</a>
 +++
 |[[canonicalIdsMap]]`canonicalIdsMap`|`String`|
@@ -115,7 +115,10 @@ Get a set of device IDs for which a recoverable error has been encountered and i
 +++
 A map of (Device ID -> SingleMessageResult) pairs
 +++
-|[[failureCount]]`failureCount`|`Number (Integer)`|-
+|[[failureCount]]`failureCount`|`Number (Integer)`|
++++
+A total number of failures (counted per requested Device ID)
++++
 |[[invalidRegistrationIds]]`invalidRegistrationIds`|`Array of String`|
 +++
 A convenience method to collect all registration IDs, that were rejected by GCM, because they are invalid.
@@ -123,12 +126,18 @@ A convenience method to collect all registration IDs, that were rejected by GCM,
  <p>
  IDs returned by this method should presumably be removed from the sender's database.
 +++
-|[[multicastId]]`multicastId`|`Number (Long)`|-
+|[[multicastId]]`multicastId`|`Number (Long)`|
++++
+Multicast ID assigned by Google
++++
 |[[retryAfterSeconds]]`retryAfterSeconds`|`Number (Integer)`|
 +++
 In case of recoverable error, GCM server may sent a retry-after header. Undocumented by Google, not really working yet
 +++
-|[[successCount]]`successCount`|`Number (Integer)`|-
+|[[successCount]]`successCount`|`Number (Integer)`|
++++
+Total number of device IDs that the notification was successfully queued to be delivered to.
++++
 |===
 
 [[GcmNotification]]

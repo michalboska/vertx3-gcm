@@ -158,6 +158,10 @@ public class GcmResponse {
         return this;
     }
 
+    /**
+     * Multicast ID assigned by Google
+     * @return
+     */
     public Long getMulticastId() {
         return multicastId;
     }
@@ -167,6 +171,10 @@ public class GcmResponse {
         return this;
     }
 
+    /**
+     * Total number of device IDs that the notification was successfully queued to be delivered to.
+     * @return
+     */
     public Integer getSuccessCount() {
         return successCount;
     }
@@ -176,6 +184,10 @@ public class GcmResponse {
         return this;
     }
 
+    /**
+     * A total number of failures (counted per requested Device ID)
+     * @return
+     */
     public Integer getFailureCount() {
         return failureCount;
     }
@@ -186,7 +198,7 @@ public class GcmResponse {
     }
 
     /**
-     * Get a total number of canonical IDs in this response.
+     * A total number of canonical IDs in this response.
      * See <a href="https://developers.google.com/cloud-messaging/registration#canonical-ids">Canonical IDs</a>
      * @return
      */
