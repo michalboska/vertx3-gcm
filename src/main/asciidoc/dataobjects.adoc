@@ -33,7 +33,7 @@
 |[[localOnly]]`localOnly`|`Boolean`|-
 |[[maxSecondsToLeave]]`maxSecondsToLeave`|`Number (Integer)`|
 +++
-Maximum number of seconds that can be sent as notification's link parameter
+Maximum number of seconds that can be sent as notification's link <i>ttlSeconds</i> parameter
 +++
 |[[registrationIdsLimit]]`registrationIdsLimit`|`Number (Integer)`|
 +++
