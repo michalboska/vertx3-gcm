@@ -116,7 +116,9 @@ public class GcmServiceConfig {
 
     /**
      * Maximum number of attempts the GCM service can make to retry a recoverable error received from the GCM server.
-     * This applies to global errors (such as recoverable HTTP-500) as well as recoverable errors per device-id
+     * This applies to global errors (such as recoverable HTTP-500) as well as recoverable errors per device-id.
+     *
+     * If both this and {@code backoffMaxSeconds} are null, retry mechanism is not applied.
      *
      * @return
      */
@@ -143,6 +145,10 @@ public class GcmServiceConfig {
         return this;
     }
 
+    /**
+     * Eventbus address this service will listen on. Only makes sense when using this service in a standalone mode (as a separately-deployed verticle).
+     * @return
+     */
     public String getAddress() {
         return address;
     }
@@ -152,6 +158,12 @@ public class GcmServiceConfig {
         return this;
     }
 
+    /**
+     * Whether this service should register a local-only eventbus handler. If true, the eventbus registration will not be propagated accross the Vert.x cluster
+     * and messages sent from another cluster nodes will not be delivered to this service.
+     * Only makes sense when using this service in a standalone mode (as a separately-deployed verticle).
+     * @return
+     */
     public Boolean getLocalOnly() {
         return localOnly;
     }
@@ -161,6 +173,13 @@ public class GcmServiceConfig {
         return this;
     }
 
+    /**
+     * Maximum number of (total) seconds this service can take in retrying notifications with recoverable errors.
+     * After this time, it will return the current result, what it managed to sent successfully so far.
+     *
+     * If both this and {@code backoffRetries} are null, retry mechanism is not applied.
+     * @return
+     */
     public Integer getBackoffMaxSeconds() {
         return backoffMaxSeconds;
     }

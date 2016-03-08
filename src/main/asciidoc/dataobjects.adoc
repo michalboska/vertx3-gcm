@@ -26,19 +26,35 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[address]]`address`|`String`|-
+|[[address]]`address`|`String`|
++++
+Eventbus address this service will listen on. Only makes sense when using this service in a standalone mode (as a separately-deployed verticle).
++++
 |[[apiKey]]`apiKey`|`String`|
 +++
 API key to authenticate with against GCM HTTP servers. See <a href="https://developers.google.com/cloud-messaging/http#auth">GCM documentation</a>.
  Required parameter.
 +++
-|[[backoffMaxSeconds]]`backoffMaxSeconds`|`Number (Integer)`|-
+|[[backoffMaxSeconds]]`backoffMaxSeconds`|`Number (Integer)`|
++++
+Maximum number of (total) seconds this service can take in retrying notifications with recoverable errors.
+ After this time, it will return the current result, what it managed to sent successfully so far.
+
+ If both this and <code>backoffRetries</code> are null, retry mechanism is not applied.
++++
 |[[backoffRetries]]`backoffRetries`|`Number (Integer)`|
 +++
 Maximum number of attempts the GCM service can make to retry a recoverable error received from the GCM server.
- This applies to global errors (such as recoverable HTTP-500) as well as recoverable errors per device-id
+ This applies to global errors (such as recoverable HTTP-500) as well as recoverable errors per device-id.
+
+ If both this and <code>backoffMaxSeconds</code> are null, retry mechanism is not applied.
 +++
-|[[localOnly]]`localOnly`|`Boolean`|-
+|[[localOnly]]`localOnly`|`Boolean`|
++++
+Whether this service should register a local-only eventbus handler. If true, the eventbus registration will not be propagated accross the Vert.x cluster
+ and messages sent from another cluster nodes will not be delivered to this service.
+ Only makes sense when using this service in a standalone mode (as a separately-deployed verticle).
++++
 |[[maxSecondsToLeave]]`maxSecondsToLeave`|`Number (Integer)`|
 +++
 Maximum number of seconds that can be sent as notification's <code>ttlSeconds</code> parameter
