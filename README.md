@@ -21,7 +21,8 @@ or it can be deployed as a separate verticle.
 ### Configuration object ###
  
 In order to start the service, a [configuration object](src/main/asciidoc/dataobjects.adoc#gcmserviceconfig) with some basic settings must be provided. 
-The <code>apiKey</code> field is always mandatory, the <code>address</code> field is only mandatory when deploying the service as a separate verticle.
+The <code>apiKey</code> field is always mandatory, the <code>address</code> field is only required when deploying the service as a separate verticle. 
+If you don't fill in any address, the fully qualified class name of the <code>GcmService</code> interface will be used.
 
 ### (alternative 1) Using the service locally ###
 
