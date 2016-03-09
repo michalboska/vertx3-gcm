@@ -12,7 +12,7 @@
 
     <groupId>com.github.michalboska</groupId>
     <artifactId>vertx-gcm-service</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <name>vertx-gcm-service</name>
     <url>https://github.com/michalboska/vertx3-gcm</url>
@@ -20,6 +20,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
+        <vertx.version>3.3.0</vertx.version>
         <service.MainClass>com.github.michalboska.vertx3.gcm.GcmService</service.MainClass>
     </properties>
 
@@ -28,7 +29,7 @@
             <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-dependencies</artifactId>
-                <version>3.2.1</version>
+                <version>${vertx.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -44,7 +45,6 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-service-proxy</artifactId>
-            <version>3.3.0-michalboska-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
