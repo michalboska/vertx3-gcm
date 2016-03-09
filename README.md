@@ -72,7 +72,7 @@ Simple notification:
 <pre>
 <code>
 
-GcmNotification notification = new GcmNotification(Arrays.asList("123", "456"));
+GcmNotification notification = new GcmNotification(Arrays.asList("deviceId1", "deviceId2", "..."));
 gcmService.sendNotification(notification, ar -> {
     if (ar.succeeded()) {
         GcmResponse result = ar.result();
@@ -91,6 +91,7 @@ Or, using the Rx-ified version:
 <pre>
 <code>
 
+GcmNotification notification = new GcmNotification(Arrays.asList("deviceId1", "deviceId2", "..."));
 com.github.michalboska.vertx3.gcm.rxjava.GcmService rxGcmService = new com.github.michalboska.vertx3.gcm.rxjava.GcmService(this.gcmService);
 rxGcmService.sendNotificationObservable(notification)
         .subscribe(result -> {
