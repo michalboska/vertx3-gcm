@@ -25,7 +25,8 @@ The <code>apiKey</code> field is always mandatory, the <code>address</code> fiel
 
 ### (alternative 1) Using the service locally ###
 
-To create and use the service locally, you have to create an instance of the service and then invoke methods directly on that instance.
+To create and use the service locally, you have to create an instance of the service and then invoke methods directly on that instance. 
+You can also optionally use the <code>GcmService</code> class in the <code>gcm.rxjava</code> package if you want to use the Rx way instead of handler callbacks.
 
 <pre>
 <code>
@@ -34,14 +35,24 @@ GcmService service = GcmService.create(vertx, new GcmServiceConfig("my GCM API k
 </code>
 </pre>
 
-## Calling the service ##
+### (alternative 2) Using the service remotely, as a separately deployed verticle(s) ###
 
 The service is made to be compatible with [vert.x service proxy](http://vertx.io/docs/vertx-service-proxy/java/) way of calling the service. 
 This means that you can use the generated stubs, namely the <code>GcmServiceVertxEBProxy</code> class when using the standalone verticle mode. This is, in fact, the recommended way when deploying the service as a separate verticle.
 If you still want to send the eventbus messages manually, see [this section in vert.x documentation](http://vertx.io/docs/vertx-service-proxy/java/#_convention_for_invoking_services_over_the_event_bus_without_proxies)
 
-When using the service locally, you can directly invoke the service object's methods or optionally use the <code>GcmService</code> class in the <code>gcm.rxjava</code> package if you want to use the Rx way instead of handler callbacks.  
-
+<pre>
+<code>
+GcmService serviceProxy = GcmService.createRemote(vertx, new GcmServiceConfig("my GCM API key"), ar -> {
+    if (ar.succeeded()) {
+        String deploymentId = ar.result(); //you can save this somewhere and use it later to undeploy the service
+        //you can start using the service now
+    } else {
+        //optionally implement error handling
+    }
+});
+</code>
+</pre>
 
 vertx-gcm mod configuration can be used to manage GCM default settings, this to decouple the code from  any future changes in default settings done by Google. All of configuration parameters, but "address", are optional. 
 <pre>

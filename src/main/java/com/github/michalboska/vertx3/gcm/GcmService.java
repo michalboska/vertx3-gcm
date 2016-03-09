@@ -49,6 +49,7 @@ public interface GcmService {
         if (instances == null) {
             instances = Runtime.getRuntime().availableProcessors();
         }
+
         vertx.deployVerticle(impl, new DeploymentOptions().setInstances(instances), handler);
         return createProxy(vertx, config.getAddress());
     }
