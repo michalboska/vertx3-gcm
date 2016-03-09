@@ -26,12 +26,11 @@ The <code>apiKey</code> field is always mandatory, the <code>address</code> fiel
 ### (alternative 1) Using the service locally ###
 
 To create and use the service locally, you have to create an instance of the service and then invoke methods directly on that instance.
-Before being able to send notifications, you have to call the <code>startLocally</code> method.
 
 <pre>
 <code>
-GcmService service = GcmService.
-
+GcmService service = GcmService.create(vertx, new GcmServiceConfig("my GCM API key"));
+//you can now invoke methods on the service object
 </code>
 </pre>
 
