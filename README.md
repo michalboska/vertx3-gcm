@@ -68,8 +68,7 @@ The completion handler will provide a [GcmResponse](src/main/asciidoc/dataobject
 
 ## Example ##
 
-You can 
-
+Simple notification:
 <pre>
 <code>
 
