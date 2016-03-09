@@ -16,7 +16,7 @@ public class GcmServiceConfig {
     private static String JSON_BACKOFF_MAX_SECONDS = "backoffMaxSeconds";
     private static String JSON_API_KEY = "apiKey";
     private static String JSON_ADDRESS = "address";
-    private static String JSON_LOCAL_ONLY = "localOnly";
+    private static String JSON_LOCAL_HANDLER = "localHandler";
 
     ///MANDATORY FIELDS
     String apiKey;
@@ -27,7 +27,7 @@ public class GcmServiceConfig {
     Integer maxSecondsToLeave = 2419200;
     Integer backoffRetries = 0;
     Integer backoffMaxSeconds = 600;
-    Boolean localOnly = false;
+    Boolean localHandler = false;
 
     public GcmServiceConfig() {
     }
@@ -41,14 +41,14 @@ public class GcmServiceConfig {
         this.apiKey = apiKey;
     }
 
-    public GcmServiceConfig(Integer registrationIdsLimit, Integer maxSecondsToLeave, Integer backoffRetries, Integer backoffMaxSeconds, String apiKey, String address, Boolean localOnly) {
+    public GcmServiceConfig(Integer registrationIdsLimit, Integer maxSecondsToLeave, Integer backoffRetries, Integer backoffMaxSeconds, String apiKey, String address, Boolean localHandler) {
         this.registrationIdsLimit = registrationIdsLimit;
         this.maxSecondsToLeave = maxSecondsToLeave;
         this.backoffRetries = backoffRetries;
         this.backoffMaxSeconds = backoffMaxSeconds;
         this.apiKey = apiKey;
         this.address = address;
-        this.localOnly = localOnly;
+        this.localHandler = localHandler;
     }
 
     public GcmServiceConfig(GcmServiceConfig copyConfig) {
@@ -58,7 +58,7 @@ public class GcmServiceConfig {
                 copyConfig.getBackoffMaxSeconds(),
                 copyConfig.getApiKey(),
                 copyConfig.getAddress(),
-                copyConfig.getLocalOnly());
+                copyConfig.getLocalHandler());
     }
 
     public GcmServiceConfig(JsonObject jsonObject) {
@@ -68,7 +68,7 @@ public class GcmServiceConfig {
                 jsonObject.getInteger(JSON_BACKOFF_MAX_SECONDS),
                 jsonObject.getString(JSON_API_KEY),
                 jsonObject.getString(JSON_ADDRESS),
-                jsonObject.getBoolean(JSON_LOCAL_ONLY));
+                jsonObject.getBoolean(JSON_LOCAL_HANDLER));
     }
 
     public JsonObject toJson() {
@@ -79,7 +79,7 @@ public class GcmServiceConfig {
                 .put(JSON_BACKOFF_MAX_SECONDS, backoffMaxSeconds)
                 .put(JSON_API_KEY, apiKey)
                 .put(JSON_ADDRESS, address)
-                .put(JSON_LOCAL_ONLY, localOnly);
+                .put(JSON_LOCAL_HANDLER, localHandler);
     }
 
     public GcmServiceConfig checkState() throws IllegalStateException {
@@ -164,12 +164,12 @@ public class GcmServiceConfig {
      * Only makes sense when using this service in a standalone mode (as a separately-deployed verticle).
      * @return
      */
-    public Boolean getLocalOnly() {
-        return localOnly;
+    public Boolean getLocalHandler() {
+        return localHandler;
     }
 
-    public GcmServiceConfig setLocalOnly(Boolean localOnly) {
-        this.localOnly = localOnly;
+    public GcmServiceConfig setLocalHandler(Boolean localHandler) {
+        this.localHandler = localHandler;
         return this;
     }
 

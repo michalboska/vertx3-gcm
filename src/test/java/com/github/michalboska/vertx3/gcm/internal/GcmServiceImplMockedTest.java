@@ -48,15 +48,15 @@ public class GcmServiceImplMockedTest extends AbstractUnitTest {
     @Before
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
-        gcmService = new GcmServiceImpl(new GcmServiceConfig("apiKey"));
-        gcmService.startLocally(runWithVertxRule.vertx(), Future.future());
+        gcmService = new GcmServiceImpl(runWithVertxRule.vertx(), new GcmServiceConfig("apiKey"));
+        gcmService.startLocally();
         gcmService.injectHttpClient(httpClient);
 
         GcmServiceConfig retryConfig = new GcmServiceConfig("apiKey")
                 .setBackoffMaxSeconds(20)
                 .setBackoffRetries(5);
-        gcmServiceWithRetry = new GcmServiceImpl(retryConfig);
-        gcmServiceWithRetry.startLocally(runWithVertxRule.vertx(), Future.future());
+        gcmServiceWithRetry = new GcmServiceImpl(runWithVertxRule.vertx(), retryConfig);
+        gcmServiceWithRetry.startLocally();
         gcmServiceWithRetry.injectHttpClient(httpClient);
     }
 

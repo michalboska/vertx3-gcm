@@ -68,7 +68,7 @@ Maximum number of attempts the GCM service can make to retry a recoverable error
 
  If both this and <code>backoffMaxSeconds</code> are null, retry mechanism is not applied.
 +++
-|[[localOnly]]`localOnly`|`Boolean`|
+|[[localHandler]]`localHandler`|`Boolean`|
 +++
 Whether this service should register a local-only eventbus handler. If true, the eventbus registration will not be propagated accross the Vert.x cluster
  and messages sent from another cluster nodes will not be delivered to this service.

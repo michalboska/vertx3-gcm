@@ -33,9 +33,11 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
     private boolean started = false;
     private Map<GcmNotification, NotificationState> stateMap = new HashMap<>();
 
-    public GcmServiceImpl(GcmServiceConfig config) {
+    public GcmServiceImpl(Vertx vertx, GcmServiceConfig config) {
         config.checkState();
         this.config = config;
+        this.vertx = vertx;
+        this.context = vertx.getOrCreateContext();
     }
 
     public GcmServiceImpl() {
@@ -48,7 +50,7 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
         config.checkState();
         httpClient = new GcmHttpClient(vertx, config);
         handler = new GcmServiceVertxProxyHandler(vertx, this);
-        MessageConsumer<JsonObject> messageConsumer = config.getLocalOnly() ? handler.registerLocalHandler(config.getAddress()) : handler.registerHandler(config.getAddress());
+        MessageConsumer<JsonObject> messageConsumer = config.getLocalHandler() ? handler.registerLocalHandler(config.getAddress()) : handler.registerHandler(config.getAddress());
         messageConsumer.completionHandler(ar -> {
             if (ar.succeeded()) {
                 started = true;
@@ -64,17 +66,14 @@ public class GcmServiceImpl extends AbstractVerticle implements GcmService {
      * Start the service in local mode (as a part of another verticle).
      * Use this to initialize the service when not deploying as a separate verticle
      *
-     * @param vertx
-     * @param startFuture
      * @throws Exception
      */
-    public void startLocally(Vertx vertx, Future<Void> startFuture) {
-        this.vertx = vertx;
-        this.context = vertx.getOrCreateContext();
+    public GcmService startLocally() {
+        Validate.validState(!started, "Service has already been started. Note that you don't need to use the startLocally() method when deploying the service as a separate verticle");
         config.checkState();
         httpClient = new GcmHttpClient(vertx, config);
         started = true;
-        startFuture.complete();
+        return this;
     }
 
     @Override

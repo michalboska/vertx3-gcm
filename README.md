@@ -18,6 +18,30 @@ You will still need to enable GCM service in Google's API console. For more info
 The service is designed to either run locally in some external Verticle instance, from with it can be used with standard invocations (method calls directly from the containing Verticle code),
 or it can be deployed as a separate verticle.
 
+### Configuration object ###
+ 
+In order to start the service, a [configuration object](./src/main/asciidoc/dataobjects.adoc#gcmserviceconfig) with some basic settings must be provided. 
+The <code>apiKey</code> field is always mandatory, the <code>address</code> field is only mandatory when deploying the service as a separate verticle.
+
+### (alternative 1) Using the service locally ###
+
+To create and use the service locally, you have to create an instance of the service and then invoke methods directly on that instance.
+Before being able to send notifications, you have to call the <code>startLocally</code> method.
+
+<pre>
+<code>
+GcmService service = GcmService.
+
+</code>
+</pre>
+
+## Calling the service ##
+
+The service is made to be compatible with [vert.x service proxy](http://vertx.io/docs/vertx-service-proxy/java/) way of calling the service. 
+This means that you can use the generated stubs, namely the <code>GcmServiceVertxEBProxy</code> class when using the standalone verticle mode. This is, in fact, the recommended way when deploying the service as a separate verticle.
+If you still want to send the eventbus messages manually, see [this section in vert.x documentation](http://vertx.io/docs/vertx-service-proxy/java/#_convention_for_invoking_services_over_the_event_bus_without_proxies)
+
+When using the service locally, you can directly invoke the service object's methods or optionally use the <code>GcmService</code> class in the <code>gcm.rxjava</code> package if you want to use the Rx way instead of handler callbacks.  
 
 
 vertx-gcm mod configuration can be used to manage GCM default settings, this to decouple the code from  any future changes in default settings done by Google. All of configuration parameters, but "address", are optional. 
