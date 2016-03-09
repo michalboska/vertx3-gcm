@@ -38,6 +38,7 @@ GcmService service = GcmService.create(vertx, new GcmServiceConfig("my GCM API k
 ### (alternative 2) Using the service remotely, as a separately deployed verticle(s) ###
 
 The service is made to be compatible with [vert.x service proxy](http://vertx.io/docs/vertx-service-proxy/java/) way of calling the service. 
+
 This means that you can use the generated stubs, namely the <code>GcmServiceVertxEBProxy</code> class when using the standalone verticle mode. This is, in fact, the recommended way when deploying the service as a separate verticle.
 If you still want to send the eventbus messages manually, see [this section in vert.x documentation](http://vertx.io/docs/vertx-service-proxy/java/#_convention_for_invoking_services_over_the_event_bus_without_proxies)
 
